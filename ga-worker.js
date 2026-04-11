@@ -8,24 +8,51 @@ let fitnesses = [];
 let bestIndividual = null;
 let bestFitness = Infinity;
 let referenceData = null;  // Uint8ClampedArray
-let refPixels = null;      // Uint32Array view for fast diff
 let width = 0;
 let height = 0;
 let config = {};
 let canvas, ctx;
-let pixelBuf = null;       // reusable ImageData — avoids alloc per fitness call
 
-self.onmessage = function (e) {
+// Wasm fitness
+let wasmDiff = null;       // pixel_diff(len) -> f64
+let wasmMem = null;        // Wasm linear memory
+let wasmBuf = null;        // Uint8Array view of wasmMem
+let pixelLen = 0;          // width * height * 4
+
+// Load Wasm module at worker startup
+const wasmReady = fetch("fitness.wasm")
+  .then((r) => r.arrayBuffer())
+  .then((buf) => WebAssembly.instantiate(buf))
+  .then(({ instance }) => {
+    wasmDiff = instance.exports.pixel_diff;
+    wasmMem = instance.exports.memory;
+  });
+
+self.onmessage = async function (e) {
   const { type, ...data } = e.data;
   if (type === "start") {
+    await wasmReady;
+
     referenceData = new Uint8ClampedArray(data.imageData);
-    refPixels = new Uint32Array(referenceData.buffer);
     width = data.width;
     height = data.height;
     config = data.config;
+    pixelLen = width * height * 4;
+
+    // Grow Wasm memory if needed (need 2 * pixelLen bytes)
+    const needed = 2 * pixelLen;
+    const currentBytes = wasmMem.buffer.byteLength;
+    if (needed > currentBytes) {
+      const pages = Math.ceil((needed - currentBytes) / 65536);
+      wasmMem.grow(pages);
+    }
+    wasmBuf = new Uint8Array(wasmMem.buffer);
+
+    // Copy reference data into Wasm memory at offset pixelLen
+    wasmBuf.set(referenceData, pixelLen);
+
     canvas = new OffscreenCanvas(width, height);
     ctx = canvas.getContext("2d", { willReadFrequently: true });
-    pixelBuf = ctx.getImageData(0, 0, width, height);
     running = true;
     generation = 0;
     bestFitness = Infinity;
@@ -135,19 +162,12 @@ function renderIndividual(individual) {
 function evaluateFitness(individual) {
   renderIndividual(individual);
 
-  // Read pixels into our pre-allocated buffer (avoids alloc + GC)
-  const buf = ctx.getImageData(0, 0, width, height);
-  const d = buf.data;
-  const ref = referenceData;
+  // Copy rendered pixels into Wasm memory at offset 0
+  const imgData = ctx.getImageData(0, 0, width, height);
+  wasmBuf.set(imgData.data, 0);
 
-  let diff = 0;
-  for (let i = 0, len = d.length; i < len; i += 4) {
-    const dr = d[i]     - ref[i];
-    const dg = d[i + 1] - ref[i + 1];
-    const db = d[i + 2] - ref[i + 2];
-    diff += dr * dr + dg * dg + db * db;
-  }
-  return diff;
+  // Wasm computes sum of squared RGB diffs
+  return wasmDiff(pixelLen);
 }
 
 // --- Selection ---

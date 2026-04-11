@@ -8,6 +8,16 @@ const { createCanvas, loadImage } = require("@napi-rs/canvas");
 const fs = require("fs");
 const path = require("path");
 
+// ── Wasm fitness module ─────────────────────────────────────────────
+
+let wasmInstance = null;
+
+async function loadWasm() {
+  const buf = fs.readFileSync(path.join(__dirname, "fitness.wasm"));
+  const { instance } = await WebAssembly.instantiate(buf);
+  wasmInstance = instance;
+}
+
 // ── Config ──────────────────────────────────────────────────────────
 
 const DURATION = 30_000; // ms per run
@@ -54,6 +64,18 @@ class GA {
     this.bestFitness = Infinity;
     this.bestIndividual = null;
     this.generation = 0;
+
+    // Set up Wasm memory for fitness eval
+    this.pixelLen = w * h * 4;
+    const mem = wasmInstance.exports.memory;
+    const needed = 2 * this.pixelLen;
+    if (needed > mem.buffer.byteLength) {
+      mem.grow(Math.ceil((needed - mem.buffer.byteLength) / 65536));
+    }
+    this.wasmBuf = new Uint8Array(mem.buffer);
+    // Copy reference data into Wasm memory at offset pixelLen
+    this.wasmBuf.set(refData, this.pixelLen);
+
     this._initPopulation();
   }
 
@@ -136,15 +158,9 @@ class GA {
   _fitness(ind) {
     this._render(ind);
     const data = this.ctx.getImageData(0, 0, this.w, this.h).data;
-    const ref = this.refData;
-    let diff = 0;
-    for (let i = 0, len = data.length; i < len; i += 4) {
-      const dr = data[i]     - ref[i];
-      const dg = data[i + 1] - ref[i + 1];
-      const db = data[i + 2] - ref[i + 2];
-      diff += dr * dr + dg * dg + db * db;
-    }
-    return diff;
+    // Copy rendered pixels into Wasm memory at offset 0
+    this.wasmBuf.set(data, 0);
+    return wasmInstance.exports.pixel_diff(this.pixelLen);
   }
 
   // ── Selection / Crossover / Mutation ──
@@ -286,6 +302,8 @@ function runOne(img, entry) {
 }
 
 async function main() {
+  await loadWasm();
+
   const imagePath = process.argv[2] || path.join(__dirname, "reference.jpg");
   const img = await loadImage(imagePath);
 

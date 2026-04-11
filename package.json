@@ -6,5 +6,8 @@
   },
   "dependencies": {
     "@napi-rs/canvas": "^0.1.65"
+  },
+  "devDependencies": {
+    "wabt": "^1.0.39"
   }
 }
