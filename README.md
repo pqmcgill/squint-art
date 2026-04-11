@@ -8,6 +8,8 @@ Named because the output looks surprisingly good if you squint.
 
 ![Earth at 119K generations](screenshot-earth.png)
 
+![Starry Night at 200K generations](screenshot-starry.png)
+
 Oh, and it works on GIFs too.
 
 ![GIF mode demo](squint-art-demo.gif)
