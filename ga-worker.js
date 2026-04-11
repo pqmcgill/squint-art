@@ -7,21 +7,25 @@ let population = [];
 let fitnesses = [];
 let bestIndividual = null;
 let bestFitness = Infinity;
-let referenceData = null;
+let referenceData = null;  // Uint8ClampedArray
+let refPixels = null;      // Uint32Array view for fast diff
 let width = 0;
 let height = 0;
 let config = {};
 let canvas, ctx;
+let pixelBuf = null;       // reusable ImageData — avoids alloc per fitness call
 
 self.onmessage = function (e) {
   const { type, ...data } = e.data;
   if (type === "start") {
     referenceData = new Uint8ClampedArray(data.imageData);
+    refPixels = new Uint32Array(referenceData.buffer);
     width = data.width;
     height = data.height;
     config = data.config;
     canvas = new OffscreenCanvas(width, height);
     ctx = canvas.getContext("2d", { willReadFrequently: true });
+    pixelBuf = ctx.getImageData(0, 0, width, height);
     running = true;
     generation = 0;
     bestFitness = Infinity;
@@ -48,6 +52,11 @@ function gaussianRandom() {
 
 // --- Individual / Polygon ---
 
+function polyFill(p) {
+  p.fill = `rgba(${p.r},${p.g},${p.b},${p.a})`;
+  return p;
+}
+
 function createRandomPolygon() {
   const nv = config.numVertices;
   const cx = Math.random();
@@ -65,22 +74,20 @@ function createRandomPolygon() {
     });
   }
 
-  return {
+  return polyFill({
     points,
     r: Math.floor(Math.random() * 256),
     g: Math.floor(Math.random() * 256),
     b: Math.floor(Math.random() * 256),
     a: Math.random() * 0.4 + 0.05,
-  };
+  });
 }
 
 function clonePolygon(p) {
   return {
     points: p.points.map((pt) => ({ x: pt.x, y: pt.y })),
-    r: p.r,
-    g: p.g,
-    b: p.b,
-    a: p.a,
+    r: p.r, g: p.g, b: p.b, a: p.a,
+    fill: p.fill,
   };
 }
 
@@ -120,20 +127,24 @@ function renderIndividual(individual) {
       ctx.lineTo(poly.points[j].x * width, poly.points[j].y * height);
     }
     ctx.closePath();
-    ctx.fillStyle = `rgba(${poly.r},${poly.g},${poly.b},${poly.a})`;
+    ctx.fillStyle = poly.fill;
     ctx.fill();
   }
 }
 
 function evaluateFitness(individual) {
   renderIndividual(individual);
-  const imgData = ctx.getImageData(0, 0, width, height).data;
+
+  // Read pixels into our pre-allocated buffer (avoids alloc + GC)
+  const buf = ctx.getImageData(0, 0, width, height);
+  const d = buf.data;
+  const ref = referenceData;
 
   let diff = 0;
-  for (let i = 0, len = imgData.length; i < len; i += 4) {
-    const dr = imgData[i] - referenceData[i];
-    const dg = imgData[i + 1] - referenceData[i + 1];
-    const db = imgData[i + 2] - referenceData[i + 2];
+  for (let i = 0, len = d.length; i < len; i += 4) {
+    const dr = d[i]     - ref[i];
+    const dg = d[i + 1] - ref[i + 1];
+    const db = d[i + 2] - ref[i + 2];
     diff += dr * dr + dg * dg + db * db;
   }
   return diff;
@@ -186,14 +197,24 @@ function mutate(individual) {
     }
 
     // Color mutations
-    if (Math.random() < mr)
+    let colorChanged = false;
+    if (Math.random() < mr) {
       poly.r = clamp(poly.r + Math.floor(gaussianRandom() * 20), 0, 255);
-    if (Math.random() < mr)
+      colorChanged = true;
+    }
+    if (Math.random() < mr) {
       poly.g = clamp(poly.g + Math.floor(gaussianRandom() * 20), 0, 255);
-    if (Math.random() < mr)
+      colorChanged = true;
+    }
+    if (Math.random() < mr) {
       poly.b = clamp(poly.b + Math.floor(gaussianRandom() * 20), 0, 255);
-    if (Math.random() < mr)
+      colorChanged = true;
+    }
+    if (Math.random() < mr) {
       poly.a = clamp(poly.a + gaussianRandom() * 0.05, 0.01, 1);
+      colorChanged = true;
+    }
+    if (colorChanged) polyFill(poly);
 
     // Swap order mutation (drawing order matters)
     if (Math.random() < mr * 0.5) {

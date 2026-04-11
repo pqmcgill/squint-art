@@ -57,6 +57,11 @@ class GA {
     this._initPopulation();
   }
 
+  static _polyFill(p) {
+    p.fill = `rgba(${p.r},${p.g},${p.b},${p.a})`;
+    return p;
+  }
+
   // ── Polygon / Individual ──
 
   _randomPolygon() {
@@ -74,19 +79,20 @@ class GA {
         y: clamp(cy + Math.sin(a) * r, 0, 1),
       });
     }
-    return {
+    return GA._polyFill({
       points,
       r: Math.floor(Math.random() * 256),
       g: Math.floor(Math.random() * 256),
       b: Math.floor(Math.random() * 256),
       a: Math.random() * 0.4 + 0.05,
-    };
+    });
   }
 
   _clonePoly(p) {
     return {
       points: p.points.map((pt) => ({ x: pt.x, y: pt.y })),
       r: p.r, g: p.g, b: p.b, a: p.a,
+      fill: p.fill,
     };
   }
 
@@ -122,7 +128,7 @@ class GA {
         ctx.lineTo(poly.points[j].x * w, poly.points[j].y * h);
       }
       ctx.closePath();
-      ctx.fillStyle = `rgba(${poly.r},${poly.g},${poly.b},${poly.a})`;
+      ctx.fillStyle = poly.fill;
       ctx.fill();
     }
   }
@@ -175,10 +181,12 @@ class GA {
           pt.y = clamp(pt.y + gaussianRandom() * 0.05, 0, 1);
         }
       }
-      if (Math.random() < mr) poly.r = clamp(poly.r + Math.floor(gaussianRandom() * 20), 0, 255);
-      if (Math.random() < mr) poly.g = clamp(poly.g + Math.floor(gaussianRandom() * 20), 0, 255);
-      if (Math.random() < mr) poly.b = clamp(poly.b + Math.floor(gaussianRandom() * 20), 0, 255);
-      if (Math.random() < mr) poly.a = clamp(poly.a + gaussianRandom() * 0.05, 0.01, 1);
+      let cc = false;
+      if (Math.random() < mr) { poly.r = clamp(poly.r + Math.floor(gaussianRandom() * 20), 0, 255); cc = true; }
+      if (Math.random() < mr) { poly.g = clamp(poly.g + Math.floor(gaussianRandom() * 20), 0, 255); cc = true; }
+      if (Math.random() < mr) { poly.b = clamp(poly.b + Math.floor(gaussianRandom() * 20), 0, 255); cc = true; }
+      if (Math.random() < mr) { poly.a = clamp(poly.a + gaussianRandom() * 0.05, 0.01, 1); cc = true; }
+      if (cc) GA._polyFill(poly);
       if (Math.random() < mr * 0.5) {
         const j = Math.floor(Math.random() * ind.polygons.length);
         [ind.polygons[i], ind.polygons[j]] = [ind.polygons[j], ind.polygons[i]];
