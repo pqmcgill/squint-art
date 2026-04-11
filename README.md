@@ -189,7 +189,7 @@ Similarity is *equal or better* with downscaling because the extra generations (
 
 **Learning:** Island model parallelism is both a performance optimization and an algorithmic improvement. The independent populations explore different regions of the search space, and migration provides genetic diversity that helps escape local optima. The throughput scaling is sub-linear but substantial.
 
-### Phase 6: Migration Topology [`TODO`]
+### Phase 6: Migration Topology [`89e5be2`](../../commit/89e5be2)
 
 The initial island model used a **star topology** — the global best individual was broadcast to every island on each migration event. This is simple but aggressive: it homogenizes populations quickly, reducing the diversity that islands are supposed to provide.
 
