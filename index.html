@@ -13,6 +13,7 @@
       <p class="subtitle">Evolving images with genetic algorithms &amp; polygons</p>
     </header>
 
+    <input type="file" id="file-input" accept="image/*" hidden>
     <div id="drop-zone" class="drop-zone">
       <div class="drop-zone-content">
         <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -23,7 +24,6 @@
         </svg>
         <p>Drop a reference image here</p>
         <p class="hint">or click to select a file</p>
-        <input type="file" id="file-input" accept="image/*" hidden>
       </div>
     </div>
 
@@ -62,6 +62,7 @@
         <button id="start-btn" class="btn btn-primary">Start</button>
         <button id="stop-btn" class="btn" disabled>Stop</button>
         <button id="reset-btn" class="btn">Reset</button>
+        <button id="download-btn" class="btn" disabled>Download</button>
         <button id="new-image-btn" class="btn">New Image</button>
       </div>
 

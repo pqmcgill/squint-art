@@ -13,6 +13,7 @@ const genCountEl = document.getElementById("gen-count");
 const similarityEl = document.getElementById("similarity-value");
 const gpsEl = document.getElementById("gens-per-sec");
 const islandsEl = document.getElementById("islands-value");
+const downloadBtn = document.getElementById("download-btn");
 const bestLabel = document.getElementById("best-label");
 const chartCanvas = document.getElementById("chart-canvas");
 
@@ -242,12 +243,15 @@ stopBtn.addEventListener("click", () => {
   killIslands();
   startBtn.disabled = false;
   stopBtn.disabled = true;
+  downloadBtn.disabled = !globalBest;
 });
 
 resetBtn.addEventListener("click", () => {
   killIslands();
   startBtn.disabled = false;
   stopBtn.disabled = true;
+  downloadBtn.disabled = true;
+  globalBest = null;
   const ctx = outputCanvas.getContext("2d");
   ctx.clearRect(0, 0, outputCanvas.width, outputCanvas.height);
   resetStats();
@@ -257,10 +261,19 @@ newImageBtn.addEventListener("click", () => {
   killIslands();
   startBtn.disabled = false;
   stopBtn.disabled = true;
+  downloadBtn.disabled = true;
+  globalBest = null;
   workspace.classList.add("hidden");
   dropZone.classList.remove("hidden");
   fileInput.value = "";
   referenceImage = null;
+});
+
+downloadBtn.addEventListener("click", () => {
+  const link = document.createElement("a");
+  link.download = "squint-art.png";
+  link.href = outputCanvas.toDataURL("image/png");
+  link.click();
 });
 
 // ---- Benchmark controls ----

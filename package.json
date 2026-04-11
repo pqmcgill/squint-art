@@ -2,6 +2,7 @@
   "name": "polygon-ga",
   "private": true,
   "scripts": {
+    "start": "npx serve .",
     "bench": "node bench.js"
   },
   "dependencies": {
