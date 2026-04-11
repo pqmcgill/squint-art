@@ -14,10 +14,14 @@ let config = {};
 let canvas, ctx;
 
 // Wasm fitness
-let wasmDiff = null;       // pixel_diff(len) -> f64
+let wasmDiff = null;       // pixel_diff(len, step) -> f64
 let wasmMem = null;        // Wasm linear memory
 let wasmBuf = null;        // Uint8Array view of wasmMem
 let pixelLen = 0;          // width * height * 4
+
+// Reduced-resolution fitness canvas
+let fitCanvas, fitCtx;
+let fitW = 0, fitH = 0, fitPixelLen = 0;
 
 // Load Wasm module at worker startup
 const wasmReady = fetch("fitness.wasm")
@@ -39,20 +43,35 @@ self.onmessage = async function (e) {
     config = data.config;
     pixelLen = width * height * 4;
 
-    // Grow Wasm memory if needed (need 2 * pixelLen bytes)
-    const needed = 2 * pixelLen;
-    const currentBytes = wasmMem.buffer.byteLength;
-    if (needed > currentBytes) {
-      const pages = Math.ceil((needed - currentBytes) / 65536);
-      wasmMem.grow(pages);
-    }
-    wasmBuf = new Uint8Array(wasmMem.buffer);
-
-    // Copy reference data into Wasm memory at offset pixelLen
-    wasmBuf.set(referenceData, pixelLen);
-
+    // Full-res canvas (for display rendering and fullDiff)
     canvas = new OffscreenCanvas(width, height);
     ctx = canvas.getContext("2d", { willReadFrequently: true });
+
+    // Reduced-resolution fitness canvas
+    const fitDiv = config.fitDiv || 1;
+    fitW = Math.max(1, Math.round(width / fitDiv));
+    fitH = Math.max(1, Math.round(height / fitDiv));
+    fitPixelLen = fitW * fitH * 4;
+    fitCanvas = new OffscreenCanvas(fitW, fitH);
+    fitCtx = fitCanvas.getContext("2d", { willReadFrequently: true });
+
+    // Scale reference to fitness resolution
+    const tmpCanvas = new OffscreenCanvas(width, height);
+    const tmpCtx = tmpCanvas.getContext("2d");
+    const tmpImg = tmpCtx.createImageData(width, height);
+    tmpImg.data.set(referenceData);
+    tmpCtx.putImageData(tmpImg, 0, 0);
+    fitCtx.drawImage(tmpCanvas, 0, 0, fitW, fitH);
+    const fitRefData = fitCtx.getImageData(0, 0, fitW, fitH).data;
+
+    // Wasm memory for fitness-sized buffers
+    const needed = 2 * fitPixelLen;
+    const currentBytes = wasmMem.buffer.byteLength;
+    if (needed > currentBytes) {
+      wasmMem.grow(Math.ceil((needed - currentBytes) / 65536));
+    }
+    wasmBuf = new Uint8Array(wasmMem.buffer);
+    wasmBuf.set(fitRefData, fitPixelLen);
     running = true;
     generation = 0;
     bestFitness = Infinity;
@@ -143,31 +162,46 @@ function initPopulation() {
 
 // --- Rendering & Fitness ---
 
-function renderIndividual(individual) {
-  ctx.fillStyle = "#000";
-  ctx.fillRect(0, 0, width, height);
-
+function renderTo(individual, c, w, h) {
+  c.fillStyle = "#000";
+  c.fillRect(0, 0, w, h);
   for (const poly of individual.polygons) {
-    ctx.beginPath();
-    ctx.moveTo(poly.points[0].x * width, poly.points[0].y * height);
+    c.beginPath();
+    c.moveTo(poly.points[0].x * w, poly.points[0].y * h);
     for (let j = 1; j < poly.points.length; j++) {
-      ctx.lineTo(poly.points[j].x * width, poly.points[j].y * height);
+      c.lineTo(poly.points[j].x * w, poly.points[j].y * h);
     }
-    ctx.closePath();
-    ctx.fillStyle = poly.fill;
-    ctx.fill();
+    c.closePath();
+    c.fillStyle = poly.fill;
+    c.fill();
   }
 }
 
+function renderIndividual(individual) {
+  renderTo(individual, ctx, width, height);
+}
+
 function evaluateFitness(individual) {
-  renderIndividual(individual);
-
-  // Copy rendered pixels into Wasm memory at offset 0
-  const imgData = ctx.getImageData(0, 0, width, height);
+  // Render at reduced fitness resolution
+  renderTo(individual, fitCtx, fitW, fitH);
+  const imgData = fitCtx.getImageData(0, 0, fitW, fitH);
   wasmBuf.set(imgData.data, 0);
+  return wasmDiff(fitPixelLen, 4);
+}
 
-  // Wasm computes sum of squared RGB diffs
-  return wasmDiff(pixelLen);
+function fullDiff() {
+  // Full-resolution diff for display — JS loop (called once per update tick)
+  renderIndividual(bestIndividual);
+  const d = ctx.getImageData(0, 0, width, height).data;
+  const ref = referenceData;
+  let diff = 0;
+  for (let i = 0, len = d.length; i < len; i += 4) {
+    const dr = d[i] - ref[i];
+    const dg = d[i + 1] - ref[i + 1];
+    const db = d[i + 2] - ref[i + 2];
+    diff += dr * dr + dg * dg + db * db;
+  }
+  return diff;
 }
 
 // --- Selection ---
@@ -294,7 +328,7 @@ async function runGA() {
     const now = Date.now();
     if (now - lastUpdate >= 150) {
       const maxDiff = width * height * 255 * 255 * 3;
-      const similarity = ((1 - bestFitness / maxDiff) * 100).toFixed(2);
+      const similarity = ((1 - fullDiff() / maxDiff) * 100).toFixed(2);
 
       self.postMessage({
         type: "update",

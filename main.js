@@ -92,6 +92,8 @@ function getConfig() {
     numVertices: parseInt(document.getElementById("num-vertices").value),
     mutationRate: parseFloat(document.getElementById("mutation-rate").value),
     tournamentSize: parseInt(document.getElementById("tournament-size").value),
+    fitDiv: parseInt(document.getElementById("fit-div").value),
+    subSample: parseInt(document.getElementById("sub-sample").value),
   };
 }
 

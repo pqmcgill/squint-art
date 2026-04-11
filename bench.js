@@ -24,16 +24,19 @@ const DURATION = 30_000; // ms per run
 const WARMUP = 3_000;    // ms warmup (not counted)
 
 const MATRIX = [
-  { label: "64px / 50pop / 50poly",   workRes: 64,  populationSize: 50,  numPolygons: 50  },
-  { label: "128px / 50pop / 50poly",  workRes: 128, populationSize: 50,  numPolygons: 50  },
-  { label: "256px / 50pop / 50poly",  workRes: 256, populationSize: 50,  numPolygons: 50  },
-  { label: "384px / 50pop / 50poly",  workRes: 384, populationSize: 50,  numPolygons: 50  },
-  { label: "128px / 25pop / 50poly",  workRes: 128, populationSize: 25,  numPolygons: 50  },
-  { label: "128px / 100pop / 50poly", workRes: 128, populationSize: 100, numPolygons: 50  },
-  { label: "128px / 200pop / 50poly", workRes: 128, populationSize: 200, numPolygons: 50  },
-  { label: "128px / 50pop / 25poly",  workRes: 128, populationSize: 50,  numPolygons: 25  },
-  { label: "128px / 50pop / 100poly", workRes: 128, populationSize: 50,  numPolygons: 100 },
-  { label: "128px / 50pop / 200poly", workRes: 128, populationSize: 50,  numPolygons: 200 },
+  // Fitness downscale sweep at baseline
+  { label: "128px 50pop 50poly fd1",   workRes: 128, populationSize: 50, numPolygons: 50,  fitDiv: 1 },
+  { label: "128px 50pop 50poly fd2",   workRes: 128, populationSize: 50, numPolygons: 50,  fitDiv: 2 },
+  { label: "128px 50pop 50poly fd4",   workRes: 128, populationSize: 50, numPolygons: 50,  fitDiv: 4 },
+  // Higher resolution (more rendering cost to cut)
+  { label: "256px 50pop 50poly fd1",   workRes: 256, populationSize: 50, numPolygons: 50,  fitDiv: 1 },
+  { label: "256px 50pop 50poly fd2",   workRes: 256, populationSize: 50, numPolygons: 50,  fitDiv: 2 },
+  { label: "256px 50pop 50poly fd4",   workRes: 256, populationSize: 50, numPolygons: 50,  fitDiv: 4 },
+  // More polygons (render cost scales with polygon count)
+  { label: "128px 50pop 100poly fd1",  workRes: 128, populationSize: 50, numPolygons: 100, fitDiv: 1 },
+  { label: "128px 50pop 100poly fd2",  workRes: 128, populationSize: 50, numPolygons: 100, fitDiv: 2 },
+  { label: "128px 50pop 200poly fd1",  workRes: 128, populationSize: 50, numPolygons: 200, fitDiv: 1 },
+  { label: "128px 50pop 200poly fd2",  workRes: 128, populationSize: 50, numPolygons: 200, fitDiv: 2 },
 ];
 
 const FIXED = { numVertices: 6, mutationRate: 0.03, tournamentSize: 5 };
@@ -57,25 +60,42 @@ class GA {
     this.w = w;
     this.h = h;
     this.cfg = cfg;
+
+    // Full-res canvas (for display / fullSimilarity)
     this.canvas = createCanvas(w, h);
     this.ctx = this.canvas.getContext("2d");
+
+    // Reduced-resolution fitness canvas
+    const fitDiv = cfg.fitDiv || 1;
+    this.fitW = Math.max(1, Math.round(w / fitDiv));
+    this.fitH = Math.max(1, Math.round(h / fitDiv));
+    this.fitPixelLen = this.fitW * this.fitH * 4;
+    this.fitCanvas = createCanvas(this.fitW, this.fitH);
+    this.fitCtx = this.fitCanvas.getContext("2d");
+
+    // Scale reference to fitness resolution
+    const tmpCanvas = createCanvas(w, h);
+    const tmpCtx = tmpCanvas.getContext("2d");
+    const tmpImg = tmpCtx.createImageData(w, h);
+    tmpImg.data.set(refData);
+    tmpCtx.putImageData(tmpImg, 0, 0);
+    this.fitCtx.drawImage(tmpCanvas, 0, 0, this.fitW, this.fitH);
+    const fitRefData = this.fitCtx.getImageData(0, 0, this.fitW, this.fitH).data;
+
+    // Wasm memory for fitness-sized buffers
+    const mem = wasmInstance.exports.memory;
+    const needed = 2 * this.fitPixelLen;
+    if (needed > mem.buffer.byteLength) {
+      mem.grow(Math.ceil((needed - mem.buffer.byteLength) / 65536));
+    }
+    this.wasmBuf = new Uint8Array(mem.buffer);
+    this.wasmBuf.set(fitRefData, this.fitPixelLen);
+
     this.population = [];
     this.fitnesses = [];
     this.bestFitness = Infinity;
     this.bestIndividual = null;
     this.generation = 0;
-
-    // Set up Wasm memory for fitness eval
-    this.pixelLen = w * h * 4;
-    const mem = wasmInstance.exports.memory;
-    const needed = 2 * this.pixelLen;
-    if (needed > mem.buffer.byteLength) {
-      mem.grow(Math.ceil((needed - mem.buffer.byteLength) / 65536));
-    }
-    this.wasmBuf = new Uint8Array(mem.buffer);
-    // Copy reference data into Wasm memory at offset pixelLen
-    this.wasmBuf.set(refData, this.pixelLen);
-
     this._initPopulation();
   }
 
@@ -139,28 +159,42 @@ class GA {
 
   // ── Render & Fitness ──
 
-  _render(ind) {
-    const { ctx, w, h } = this;
-    ctx.fillStyle = "#000";
-    ctx.fillRect(0, 0, w, h);
+  _renderTo(ind, c, w, h) {
+    c.fillStyle = "#000";
+    c.fillRect(0, 0, w, h);
     for (const poly of ind.polygons) {
-      ctx.beginPath();
-      ctx.moveTo(poly.points[0].x * w, poly.points[0].y * h);
+      c.beginPath();
+      c.moveTo(poly.points[0].x * w, poly.points[0].y * h);
       for (let j = 1; j < poly.points.length; j++) {
-        ctx.lineTo(poly.points[j].x * w, poly.points[j].y * h);
+        c.lineTo(poly.points[j].x * w, poly.points[j].y * h);
       }
-      ctx.closePath();
-      ctx.fillStyle = poly.fill;
-      ctx.fill();
+      c.closePath();
+      c.fillStyle = poly.fill;
+      c.fill();
     }
   }
 
   _fitness(ind) {
-    this._render(ind);
-    const data = this.ctx.getImageData(0, 0, this.w, this.h).data;
-    // Copy rendered pixels into Wasm memory at offset 0
+    this._renderTo(ind, this.fitCtx, this.fitW, this.fitH);
+    const data = this.fitCtx.getImageData(0, 0, this.fitW, this.fitH).data;
     this.wasmBuf.set(data, 0);
-    return wasmInstance.exports.pixel_diff(this.pixelLen);
+    return wasmInstance.exports.pixel_diff(this.fitPixelLen, 4);
+  }
+
+  // Full-resolution similarity for final reporting (JS loop, called once)
+  fullSimilarity() {
+    this._renderTo(this.bestIndividual, this.ctx, this.w, this.h);
+    const d = this.ctx.getImageData(0, 0, this.w, this.h).data;
+    const ref = this.refData;
+    let diff = 0;
+    for (let i = 0, len = d.length; i < len; i += 4) {
+      const dr = d[i] - ref[i];
+      const dg = d[i + 1] - ref[i + 1];
+      const db = d[i + 2] - ref[i + 2];
+      diff += dr * dr + dg * dg + db * db;
+    }
+    const maxDiff = this.w * this.h * 255 * 255 * 3;
+    return (1 - diff / maxDiff) * 100;
   }
 
   // ── Selection / Crossover / Mutation ──
@@ -295,7 +329,7 @@ function runOne(img, entry) {
     workSize: `${width}x${height}`,
     generations: gens,
     genPerSec: +(gens / elapsed).toFixed(1),
-    similarity: +ga.similarity().toFixed(2),
+    similarity: +ga.fullSimilarity().toFixed(2),
     elapsedSec: +elapsed.toFixed(1),
     samples,
   };
