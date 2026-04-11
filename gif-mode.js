@@ -1,9 +1,72 @@
 // GIF mode — decode GIF into frames, run GA on each, encode output GIF.
 
+// ── GIF Playback ──
+
+class GifPlayer {
+  constructor(canvas) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext("2d");
+    this.frames = [];  // { source (canvas or ImageData), delay }
+    this.index = 0;
+    this._timer = null;
+  }
+
+  setFrames(frames, width, height) {
+    this.stop();
+    this.frames = frames;
+    this.canvas.width = width;
+    this.canvas.height = height;
+    this.index = 0;
+    if (frames.length > 0) this._drawFrame(0);
+  }
+
+  play() {
+    if (this.frames.length < 2) return;
+    this.stop();
+    this._scheduleNext();
+  }
+
+  stop() {
+    if (this._timer) {
+      clearTimeout(this._timer);
+      this._timer = null;
+    }
+  }
+
+  _drawFrame(i) {
+    const frame = this.frames[i];
+    if (!frame) return;
+    const { canvas, ctx } = this;
+    if (frame.source instanceof ImageData) {
+      // Scale ImageData to canvas size via temp canvas
+      const tmp = document.createElement("canvas");
+      tmp.width = frame.source.width;
+      tmp.height = frame.source.height;
+      tmp.getContext("2d").putImageData(frame.source, 0, 0);
+      ctx.drawImage(tmp, 0, 0, canvas.width, canvas.height);
+    } else {
+      // Canvas element — draw directly
+      ctx.drawImage(frame.source, 0, 0, canvas.width, canvas.height);
+    }
+  }
+
+  _scheduleNext() {
+    const frame = this.frames[this.index];
+    if (!frame) return;
+    this._timer = setTimeout(() => {
+      this.index = (this.index + 1) % this.frames.length;
+      this._drawFrame(this.index);
+      this._scheduleNext();
+    }, frame.delay);
+  }
+}
+
+// ── GIF Processor ──
+
 class GifProcessor {
   constructor() {
     this.frames = [];       // { imageData, delay }
-    this.outputFrames = []; // canvas ImageData per frame
+    this.outputFrames = []; // { canvas, delay } per frame
     this.width = 0;
     this.height = 0;
     this.running = false;
@@ -54,9 +117,12 @@ class GifProcessor {
 
       // Capture the full composited frame
       const fullFrame = compCtx.getImageData(0, 0, w, h);
+      // gifuct delay is centiseconds; gif.js expects milliseconds
+      // Browsers treat delay=0 as ~100ms; floor to 20ms like browsers do
+      const delayMs = Math.max(20, (frame.delay || 10) * 10);
       this.frames.push({
         imageData: fullFrame,
-        delay: frame.delay * 10, // gifuct delay is in centiseconds
+        delay: delayMs,
       });
     }
 

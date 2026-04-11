@@ -28,6 +28,8 @@ let referenceImage = null;
 let startTime = 0;
 let isGifMode = false;
 const gifProcessor = new GifProcessor();
+const refPlayer = new GifPlayer(referenceCanvas);
+const outPlayer = new GifPlayer(outputCanvas);
 
 // Per-island tracking
 let islandState = [];    // { generation, similarity, polygons } per island
@@ -323,11 +325,16 @@ resetBtn.addEventListener("click", () => {
 
 newImageBtn.addEventListener("click", () => {
   killIslands();
+  refPlayer.stop();
+  outPlayer.stop();
+  gifProcessor.cancel();
   startBtn.disabled = false;
   stopBtn.disabled = true;
   downloadBtn.disabled = true;
   globalBest = null;
+  isGifMode = false;
   workspace.classList.add("hidden");
+  gifProgress.classList.add("hidden");
   dropZone.classList.remove("hidden");
   fileInput.value = "";
   referenceImage = null;
@@ -361,22 +368,22 @@ async function handleGif(file) {
   const info = await gifProcessor.decode(buf);
   pendingGifBuffer = buf;
 
-  // Show first frame as reference preview
-  const firstFrame = gifProcessor.frames[0];
   const maxDisplay = 400;
   const scale = Math.min(maxDisplay / info.width, maxDisplay / info.height, 1);
   const dw = Math.round(info.width * scale);
   const dh = Math.round(info.height * scale);
+
+  // Set up reference player with decoded frames
+  const refFrames = gifProcessor.frames.map((f) => ({
+    source: f.imageData,
+    delay: f.delay,
+  }));
   referenceCanvas.width = dw;
   referenceCanvas.height = dh;
   outputCanvas.width = dw;
   outputCanvas.height = dh;
-
-  const tmpCanvas = document.createElement("canvas");
-  tmpCanvas.width = info.width;
-  tmpCanvas.height = info.height;
-  tmpCanvas.getContext("2d").putImageData(firstFrame.imageData, 0, 0);
-  referenceCanvas.getContext("2d").drawImage(tmpCanvas, 0, 0, dw, dh);
+  refPlayer.setFrames(refFrames, dw, dh);
+  refPlayer.play();
 
   dropZone.classList.add("hidden");
   workspace.classList.remove("hidden");
@@ -405,6 +412,7 @@ gifCancelRunBtn.addEventListener("click", () => {
   gifProcessor.cancel();
   gifProgress.classList.add("hidden");
   startBtn.disabled = false;
+  refPlayer.play();
 });
 
 async function startGifProcessing() {
@@ -412,6 +420,10 @@ async function startGifProcessing() {
   config.generationsPerFrame = parseInt(document.getElementById("gif-gens").value);
   config.warmStart = document.getElementById("gif-warm").value === "1";
   config.workRes = parseInt(document.getElementById("work-res").value);
+
+  // Stop playback during processing
+  refPlayer.stop();
+  outPlayer.stop();
 
   startBtn.disabled = true;
   stopBtn.disabled = true;
@@ -425,7 +437,7 @@ async function startGifProcessing() {
     gifProgressFill.style.width = ((frameIdx / total) * 100) + "%";
     renderPolygons(polygons);
 
-    // Show the current reference frame too
+    // Show the current reference frame
     const frame = gifProcessor.frames[frameIdx - 1];
     const tmpCanvas = document.createElement("canvas");
     tmpCanvas.width = gifProcessor.width;
@@ -440,6 +452,20 @@ async function startGifProcessing() {
     gifProgress.classList.add("hidden");
     gifProgressFill.style.width = "100%";
     startBtn.disabled = false;
+
+    // Start playback of both reference and output GIFs side by side
+    const refFrames = gifProcessor.frames.map((f) => ({
+      source: f.imageData,
+      delay: f.delay,
+    }));
+    const outFrames = gifProcessor.outputFrames.map((f) => ({
+      source: f.canvas,
+      delay: f.delay,
+    }));
+    refPlayer.setFrames(refFrames, referenceCanvas.width, referenceCanvas.height);
+    outPlayer.setFrames(outFrames, outputCanvas.width, outputCanvas.height);
+    refPlayer.play();
+    outPlayer.play();
 
     // Enable download as GIF
     downloadBtn.disabled = false;
