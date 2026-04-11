@@ -189,6 +189,33 @@ Similarity is *equal or better* with downscaling because the extra generations (
 
 **Learning:** Island model parallelism is both a performance optimization and an algorithmic improvement. The independent populations explore different regions of the search space, and migration provides genetic diversity that helps escape local optima. The throughput scaling is sub-linear but substantial.
 
+### Phase 6: Migration Topology [`TODO`]
+
+The initial island model used a **star topology** — the global best individual was broadcast to every island on each migration event. This is simple but aggressive: it homogenizes populations quickly, reducing the diversity that islands are supposed to provide.
+
+**Changes:**
+- Configurable migration topology: ring, grid, or star
+- **Ring** (1D ring): each island has exactly 2 neighbors. Good traits diffuse gradually across the ring over successive migrations. Maximum propagation distance = N/2 hops.
+- **Grid** (2D): `ceil(sqrt(N))` columns. Each island has 2-4 neighbors. More connectivity than ring, less than star.
+- **Fitness-weighted migrant selection**: instead of always sending the best, a tournament selects the source neighbor with 70/30 bias toward fitter candidates. This occasionally injects mediocre-but-different individuals, maintaining genetic diversity.
+- Migration visualization: live canvas showing island nodes colored by relative fitness, with animated arcs showing migration events.
+
+**Result (9 islands, 128px / 50pop / 50poly / fd2, 30s):**
+
+| Topology | Gen/s | Similarity | Total Gens |
+|----------|-------|------------|------------|
+| 1 thread | 26.5 | 97.49% | 794 |
+| Star | 463.2 | 97.71% | 13,902 |
+| Ring | 409.2 | **97.79%** | 12,274 |
+| Grid | 302.0 | 97.67% | 9,078 |
+| No migration | 267.6 | 97.72% | 8,031 |
+
+Ring achieves the **highest convergence quality** (97.79%) despite fewer total generations than star. The more restrained migration preserves diversity longer, allowing islands to independently explore different regions before cross-pollination gradually diffuses good traits.
+
+Star is fastest in raw throughput but its aggressive broadcasting causes early convergence to the same local optimum across all islands. No-migration islands evolve completely independently — decent quality but no cross-pollination benefit.
+
+**Learning:** Migration topology is a quality-of-convergence lever, not a throughput lever. Star maximizes speed of spreading the current best; ring maximizes the probability of *finding* a better solution by maintaining population diversity across islands. For short runs, star wins. For longer runs where escaping local optima matters, ring is the better default.
+
 ### Summary
 
 | Optimization | Gen/s | Cumulative vs Original |

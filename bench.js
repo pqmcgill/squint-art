@@ -21,19 +21,49 @@ const NUM_CORES = os.cpus().length;
 const ISLANDS = Math.max(2, NUM_CORES - 1);
 
 const MATRIX = [
-  // Single-thread baselines (fd2 is our current best default)
-  { label: "128px 50pop 50poly 1t",     workRes: 128, populationSize: 50, numPolygons: 50, fitDiv: 2, islands: 1 },
-  // Island model at same config
-  { label: `128px 50pop 50poly ${ISLANDS}t`, workRes: 128, populationSize: 50, numPolygons: 50, fitDiv: 2, islands: ISLANDS },
-  // Single vs island at higher load
-  { label: "256px 50pop 50poly 1t",     workRes: 256, populationSize: 50, numPolygons: 50, fitDiv: 2, islands: 1 },
-  { label: `256px 50pop 50poly ${ISLANDS}t`, workRes: 256, populationSize: 50, numPolygons: 50, fitDiv: 2, islands: ISLANDS },
-  // More polygons
-  { label: "128px 50pop 100poly 1t",    workRes: 128, populationSize: 50, numPolygons: 100, fitDiv: 2, islands: 1 },
-  { label: `128px 50pop 100poly ${ISLANDS}t`, workRes: 128, populationSize: 50, numPolygons: 100, fitDiv: 2, islands: ISLANDS },
+  // Single thread baseline
+  { label: "128px 1t (no migration)",        workRes: 128, populationSize: 50, numPolygons: 50, fitDiv: 2, islands: 1 },
+  // Topology comparison at same island count
+  { label: `128px ${ISLANDS}t star`,         workRes: 128, populationSize: 50, numPolygons: 50, fitDiv: 2, islands: ISLANDS, topology: "star" },
+  { label: `128px ${ISLANDS}t ring`,         workRes: 128, populationSize: 50, numPolygons: 50, fitDiv: 2, islands: ISLANDS, topology: "ring" },
+  { label: `128px ${ISLANDS}t grid`,         workRes: 128, populationSize: 50, numPolygons: 50, fitDiv: 2, islands: ISLANDS, topology: "grid" },
+  { label: `128px ${ISLANDS}t no-migration`, workRes: 128, populationSize: 50, numPolygons: 50, fitDiv: 2, islands: ISLANDS, topology: "none" },
 ];
 
 const FIXED = { numVertices: 6, mutationRate: 0.03, tournamentSize: 5 };
+
+// ── Topology definitions ────────────────────────────────────────────
+
+const TOPOLOGIES = {
+  ring: (i, n) => [(i - 1 + n) % n, (i + 1) % n],
+  grid: (i, n) => {
+    const cols = Math.ceil(Math.sqrt(n));
+    const row = Math.floor(i / cols);
+    const col = i % cols;
+    const out = [];
+    if (row > 0) out.push((row - 1) * cols + col);
+    if ((row + 1) * cols + col < n) out.push((row + 1) * cols + col);
+    if (col > 0) out.push(row * cols + col - 1);
+    if (col + 1 < cols && row * cols + col + 1 < n) out.push(row * cols + col + 1);
+    return out;
+  },
+  star: (i, n) => {
+    const out = [];
+    for (let j = 0; j < n; j++) if (j !== i) out.push(j);
+    return out;
+  },
+  none: () => [],
+};
+
+function selectSource(candidates, islandPolygons) {
+  const valid = candidates.filter((i) => islandPolygons[i]);
+  if (valid.length === 0) return null;
+  if (valid.length === 1) return valid[0];
+  const a = valid[Math.floor(Math.random() * valid.length)];
+  let b = valid[Math.floor(Math.random() * valid.length)];
+  while (b === a && valid.length > 1) b = valid[Math.floor(Math.random() * valid.length)];
+  return Math.random() < 0.7 ? a : b;
+}
 
 // ── Wasm loader ─────────────────────────────────────────────────────
 
@@ -92,16 +122,20 @@ function runSingle(img, entry) {
 function runIsland(img, entry) {
   const cfg = { ...FIXED, ...entry };
   const numIslands = entry.islands;
+  const topology = entry.topology || "star";
+  const neighborFn = TOPOLOGIES[topology] || TOPOLOGIES.none;
+  const migrationInterval = 5000;
   const { data, width, height } = prepareRef(img, cfg.workRes);
-  const wasmPath = path.join(__dirname, "fitness.wasm");
+  const wasmPath = path.resolve(__dirname, "fitness.wasm");
 
   return new Promise((resolve) => {
     const threads = [];
-    const results = [];
+    const finalResults = [];
+    const islandPolygons = new Array(numIslands).fill(null);
     let done = 0;
 
     for (let i = 0; i < numIslands; i++) {
-      const t = new ThreadWorker(path.join(__dirname, "bench-worker.js"), {
+      const t = new ThreadWorker(path.resolve(__dirname, "bench-worker.js"), {
         workerData: {
           refData: Buffer.from(data.buffer),
           w: width,
@@ -114,18 +148,20 @@ function runIsland(img, entry) {
       });
 
       t.on("message", (msg) => {
-        if (msg.type === "done") {
-          results.push(msg);
+        if (msg.type === "state") {
+          islandPolygons[i] = msg.polygons;
+        } else if (msg.type === "done") {
+          finalResults.push(msg);
           done++;
           if (done === numIslands) {
-            // Aggregate: sum gen/s, take best similarity
-            const totalGens = results.reduce((s, r) => s + r.generations, 0);
-            const totalGenPerSec = results.reduce((s, r) => s + r.genPerSec, 0);
-            const bestSim = Math.max(...results.map((r) => r.fullSimilarity));
+            clearInterval(migTimer);
+            const totalGens = finalResults.reduce((s, r) => s + r.generations, 0);
+            const totalGenPerSec = finalResults.reduce((s, r) => s + r.genPerSec, 0);
+            const bestSim = Math.max(...finalResults.map((r) => r.fullSimilarity));
 
             resolve({
               label: entry.label,
-              config: cfg,
+              config: { ...cfg, topology },
               workSize: `${width}x${height}`,
               generations: totalGens,
               genPerSec: +totalGenPerSec.toFixed(1),
@@ -138,6 +174,17 @@ function runIsland(img, entry) {
 
       threads.push(t);
     }
+
+    // Periodic migration based on topology
+    const migTimer = setInterval(() => {
+      for (let i = 0; i < numIslands; i++) {
+        const neighbors = neighborFn(i, numIslands);
+        const source = selectSource(neighbors, islandPolygons);
+        if (source !== null && islandPolygons[source]) {
+          threads[i].postMessage({ type: "migrate", polygons: islandPolygons[source] });
+        }
+      }
+    }, migrationInterval);
   });
 }
 

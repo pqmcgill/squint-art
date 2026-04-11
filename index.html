@@ -101,27 +101,44 @@
             Subsample (1 = all pixels)
             <input type="number" id="sub-sample" value="1" min="1" max="16" step="1">
           </label>
+          <label>
+            Migration Topology
+            <select id="topology">
+              <option value="ring" selected>Ring</option>
+              <option value="grid">Grid</option>
+              <option value="star">Star</option>
+            </select>
+          </label>
         </div>
       </details>
 
-      <div class="chart-section">
-        <div class="chart-header">
-          <h3>Performance</h3>
-          <div class="chart-actions">
-            <div class="axis-toggle">
-              <button class="toggle-btn active" data-axis="generation">Generation</button>
-              <button class="toggle-btn" data-axis="time">Time</button>
+      <div class="monitor-row">
+        <div class="chart-section">
+          <div class="chart-header">
+            <h3>Performance</h3>
+            <div class="chart-actions">
+              <div class="axis-toggle">
+                <button class="toggle-btn active" data-axis="generation">Generation</button>
+                <button class="toggle-btn" data-axis="time">Time</button>
+              </div>
+              <button class="btn btn-sm" id="export-btn">Export JSON</button>
+              <button class="btn btn-sm" id="clear-chart-btn">Clear</button>
             </div>
-            <button class="btn btn-sm" id="export-btn">Export JSON</button>
-            <button class="btn btn-sm" id="clear-chart-btn">Clear</button>
           </div>
+          <canvas id="chart-canvas"></canvas>
         </div>
-        <canvas id="chart-canvas"></canvas>
+        <div class="viz-section">
+          <div class="chart-header">
+            <h3>Islands</h3>
+          </div>
+          <canvas id="migration-canvas"></canvas>
+        </div>
       </div>
     </div>
   </div>
 
   <script src="benchmark.js"></script>
+  <script src="migration-viz.js"></script>
   <script src="main.js"></script>
 </body>
 </html>

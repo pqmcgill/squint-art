@@ -226,11 +226,47 @@ canvas {
   border-color: #7c6aef;
 }
 
-/* ---- Chart ---- */
+/* ---- Settings select ---- */
+.settings-grid select {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #333;
+  border-radius: 4px;
+  background: #141416;
+  color: #e0e0e0;
+  font-size: 0.85rem;
+  width: 100%;
+}
+
+.settings-grid select:focus {
+  outline: none;
+  border-color: #7c6aef;
+}
+
+/* ---- Monitor row (chart + viz) ---- */
+.monitor-row {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
 .chart-section {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.viz-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+#migration-canvas {
+  border-radius: 6px;
+  background: #141416;
 }
 
 .chart-header {

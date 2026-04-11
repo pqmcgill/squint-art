@@ -17,7 +17,10 @@ const downloadBtn = document.getElementById("download-btn");
 const bestLabel = document.getElementById("best-label");
 const chartCanvas = document.getElementById("chart-canvas");
 
+const migrationCanvas = document.getElementById("migration-canvas");
+
 const benchmark = new Benchmark(chartCanvas);
+const migViz = new MigrationViz(migrationCanvas);
 
 let workers = [];
 let migrationTimer = null;
@@ -25,7 +28,7 @@ let referenceImage = null;
 let startTime = 0;
 
 // Per-island tracking
-let islandGens = [];     // generation count per island
+let islandState = [];    // { generation, similarity, polygons } per island
 let globalBest = null;   // { similarity, polygons }
 
 // ---- Drag & Drop ----
@@ -84,7 +87,10 @@ function setupWorkspace(img) {
   dropZone.classList.add("hidden");
   workspace.classList.remove("hidden");
 
-  requestAnimationFrame(() => benchmark.resize());
+  requestAnimationFrame(() => {
+    benchmark.resize();
+    migViz.resize();
+  });
   resetStats();
 }
 
@@ -123,17 +129,59 @@ function getNumIslands() {
   return Math.max(1, (navigator.hardwareConcurrency || 4) - 1);
 }
 
+function getTopology() {
+  return document.getElementById("topology").value;
+}
+
+// Fitness-weighted selection: pick from candidates, biased toward higher similarity
+function selectSource(candidates) {
+  const valid = candidates.filter((i) => islandState[i] && islandState[i].polygons);
+  if (valid.length === 0) return null;
+  if (valid.length === 1) return valid[0];
+
+  // Tournament of 2: pick two random candidates, return the fitter one
+  // (with 30% chance of picking the worse one for diversity)
+  const a = valid[Math.floor(Math.random() * valid.length)];
+  let b = valid[Math.floor(Math.random() * valid.length)];
+  while (b === a && valid.length > 1) b = valid[Math.floor(Math.random() * valid.length)];
+
+  const simA = islandState[a].similarity;
+  const simB = islandState[b].similarity;
+  const better = simA >= simB ? a : b;
+  const worse = simA >= simB ? b : a;
+
+  return Math.random() < 0.7 ? better : worse;
+}
+
+function migrate() {
+  if (workers.length < 2) return;
+
+  const topology = getTopology();
+  const n = workers.length;
+
+  for (let i = 0; i < n; i++) {
+    const neighbors = migViz.getNeighbors(i);
+    const source = selectSource(neighbors);
+    if (source === null) continue;
+
+    workers[i].postMessage({ type: "migrate", polygons: islandState[source].polygons });
+    migViz.addMigration(source, i);
+  }
+}
+
 function spawnIslands() {
   killIslands();
 
   const { data, width, height } = getWorkImageData();
   const config = getConfig();
   const numIslands = getNumIslands();
-  const migrationInterval = 5000; // ms
+  const topology = getTopology();
+  const migrationInterval = 5000;
 
-  benchmark.startRun({ ...config, islands: numIslands });
+  benchmark.startRun({ ...config, islands: numIslands, topology });
+  migViz.reset(topology, numIslands);
 
-  islandGens = new Array(numIslands).fill(0);
+  islandState = new Array(numIslands).fill(null);
   globalBest = null;
 
   for (let i = 0; i < numIslands; i++) {
@@ -142,7 +190,13 @@ function spawnIslands() {
     w.onmessage = (e) => {
       const msg = e.data;
       if (msg.type === "update") {
-        islandGens[i] = msg.generation;
+        islandState[i] = {
+          generation: msg.generation,
+          similarity: msg.similarity,
+          polygons: msg.polygons,
+        };
+        migViz.updateIsland(i, msg.similarity);
+
         if (!globalBest || msg.similarity > globalBest.similarity) {
           globalBest = { similarity: msg.similarity, polygons: msg.polygons };
           renderPolygons(msg.polygons);
@@ -151,7 +205,6 @@ function spawnIslands() {
       }
     };
 
-    // Each worker gets its own copy of the image buffer
     w.postMessage({
       type: "start",
       imageData: data.buffer.slice(0),
@@ -165,14 +218,7 @@ function spawnIslands() {
 
   islandsEl.textContent = numIslands;
   startTime = Date.now();
-
-  // Periodic migration: send global best to all islands
-  migrationTimer = setInterval(() => {
-    if (!globalBest || workers.length < 2) return;
-    for (const w of workers) {
-      w.postMessage({ type: "migrate", polygons: globalBest.polygons });
-    }
-  }, migrationInterval);
+  migrationTimer = setInterval(migrate, migrationInterval);
 }
 
 function killIslands() {
@@ -186,7 +232,8 @@ function killIslands() {
 }
 
 function updateStats() {
-  const totalGens = islandGens.reduce((a, b) => a + b, 0);
+  let totalGens = 0;
+  for (const s of islandState) if (s) totalGens += s.generation;
   genCountEl.textContent = totalGens.toLocaleString();
 
   if (globalBest) {
@@ -198,6 +245,8 @@ function updateStats() {
   if (elapsed > 0) {
     gpsEl.textContent = Math.round(totalGens / elapsed);
   }
+
+  migViz.draw();
 }
 
 // ---- Rendering ----

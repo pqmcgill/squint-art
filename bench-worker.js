@@ -1,15 +1,14 @@
 // Island worker thread for bench.js — runs GA in its own thread.
+// Supports periodic state reporting and migration via receiveMessageOnPort.
 
-const { parentPort, workerData } = require("worker_threads");
+const { parentPort, workerData, receiveMessageOnPort } = require("worker_threads");
 const { createCanvas } = require("@napi-rs/canvas");
 const fs = require("fs");
-const path = require("path");
 const { GA } = require("./ga-engine-node.js");
 
 (async () => {
   const { refData, w, h, cfg, wasmPath, duration, warmup } = workerData;
 
-  // Each thread loads its own Wasm instance (separate memory)
   const wasmBuf = fs.readFileSync(wasmPath);
   const { instance } = await WebAssembly.instantiate(wasmBuf);
 
@@ -22,10 +21,29 @@ const { GA } = require("./ga-engine-node.js");
   const genStart = ga.generation;
   const t0 = performance.now();
   const tEnd = t0 + duration;
+  let lastReport = t0;
 
-  // Run generations, check for migration messages between generations
   while (performance.now() < tEnd) {
     ga.step();
+
+    // Non-blocking check for migration messages
+    let msg;
+    while ((msg = receiveMessageOnPort(parentPort))) {
+      if (msg.message.type === "migrate" && msg.message.polygons) {
+        ga.migrate(msg.message.polygons);
+      }
+    }
+
+    // Report state every second for migration coordination
+    const now = performance.now();
+    if (now - lastReport >= 1000) {
+      parentPort.postMessage({
+        type: "state",
+        generation: ga.generation - genStart,
+        polygons: ga.bestIndividual ? ga.bestIndividual.polygons : null,
+      });
+      lastReport = now;
+    }
   }
 
   const elapsed = (performance.now() - t0) / 1000;
@@ -39,11 +57,3 @@ const { GA } = require("./ga-engine-node.js");
     fullSimilarity: +ga.fullSimilarity().toFixed(2),
   });
 })();
-
-// Handle migration messages while running
-parentPort.on("message", (msg) => {
-  // Migration messages are fire-and-forget; the GA processes them
-  // between generations via the main loop check above.
-  // For simplicity in the benchmark, we skip runtime migration
-  // and just measure raw parallel throughput.
-});
