@@ -283,9 +283,9 @@ canvas {
 }
 
 #migration-canvas {
-  width: 100%;
   border-radius: 6px;
   background: #141416;
+  align-self: center;
 }
 
 .chart-header {

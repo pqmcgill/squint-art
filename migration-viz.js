@@ -51,8 +51,10 @@ class MigrationViz {
     if (!parent) return;
     const w = parent.clientWidth;
     if (w === 0) return;
-    this.canvas.width = w;
-    this.canvas.height = Math.min(220, Math.max(160, w * 0.6));
+    // Square canvas that fits within the container
+    const size = Math.min(w, 240);
+    this.canvas.width = size;
+    this.canvas.height = size;
     this.draw();
   }
 
