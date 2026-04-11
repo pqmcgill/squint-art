@@ -52,7 +52,7 @@ class MigrationViz {
     const w = parent.clientWidth;
     if (w === 0) return;
     this.canvas.width = w;
-    this.canvas.height = 180;
+    this.canvas.height = Math.min(220, Math.max(160, w * 0.6));
     this.draw();
   }
 

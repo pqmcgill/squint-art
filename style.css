@@ -242,11 +242,32 @@ canvas {
   border-color: #7c6aef;
 }
 
-/* ---- Monitor (chart + viz stacked) ---- */
+/* ---- Monitor (chart + viz) ---- */
 .monitor-row {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+}
+
+@media (min-width: 760px) {
+  .monitor-row {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .chart-section {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .viz-section {
+    flex: 0 0 240px;
+  }
+
+  #migration-canvas {
+    height: 220px;
+  }
 }
 
 .chart-section {
@@ -271,6 +292,12 @@ canvas {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.chart-actions {
+  white-space: nowrap;
 }
 
 .chart-header h3 {
