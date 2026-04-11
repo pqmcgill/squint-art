@@ -76,7 +76,13 @@ self.onmessage = async function (e) {
     generation = 0;
     bestFitness = Infinity;
     bestIndividual = null;
-    initPopulation();
+
+    if (data.warmStart) {
+      // Seed population from previous frame's best (with mutations for diversity)
+      warmStartPopulation(data.warmStart);
+    } else {
+      initPopulation();
+    }
     runGA();
   } else if (type === "stop") {
     running = false;
@@ -172,6 +178,28 @@ function initPopulation() {
   fitnesses = [];
   for (let i = 0; i < config.populationSize; i++) {
     population.push(createIndividual());
+    fitnesses.push(Infinity);
+  }
+}
+
+function warmStartPopulation(polygons) {
+  // Build a seed individual from the provided polygons
+  const seed = {
+    polygons: polygons.map((p) => polyFill({
+      points: p.points.map((pt) => ({ x: pt.x, y: pt.y })),
+      r: p.r, g: p.g, b: p.b, a: p.a,
+    })),
+  };
+  population = [];
+  fitnesses = [];
+  // First individual is the seed unchanged
+  population.push(cloneIndividual(seed));
+  fitnesses.push(Infinity);
+  // Rest are mutated copies for diversity
+  for (let i = 1; i < config.populationSize; i++) {
+    const copy = cloneIndividual(seed);
+    mutate(copy);
+    population.push(copy);
     fitnesses.push(Infinity);
   }
 }
@@ -335,11 +363,26 @@ function runGeneration() {
 }
 
 async function runGA() {
+  const maxGens = config.maxGenerations || 0; // 0 = unlimited
   let lastUpdate = Date.now();
 
   while (running) {
     runGeneration();
     generation++;
+
+    // Fixed generation limit — send done and stop
+    if (maxGens > 0 && generation >= maxGens) {
+      const maxDiff = width * height * 255 * 255 * 3;
+      const similarity = ((1 - fullDiff() / maxDiff) * 100).toFixed(2);
+      self.postMessage({
+        type: "done",
+        generation,
+        similarity: parseFloat(similarity),
+        polygons: bestIndividual.polygons,
+      });
+      running = false;
+      return;
+    }
 
     const now = Date.now();
     if (now - lastUpdate >= 150) {

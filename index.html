@@ -13,7 +13,7 @@
       <p class="subtitle">Evolving images with genetic algorithms &amp; polygons</p>
     </header>
 
-    <input type="file" id="file-input" accept="image/*" hidden>
+    <input type="file" id="file-input" accept="image/*,image/gif" hidden>
     <div id="drop-zone" class="drop-zone">
       <div class="drop-zone-content">
         <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -109,8 +109,42 @@
               <option value="star">Star</option>
             </select>
           </label>
+          <label>
+            GIF: Generations/Frame
+            <input type="number" id="gif-gens" value="500" min="50" max="10000" step="50">
+          </label>
+          <label>
+            GIF: Warm Start
+            <select id="gif-warm">
+              <option value="1" selected>On</option>
+              <option value="0">Off</option>
+            </select>
+          </label>
         </div>
       </details>
+
+      <!-- GIF confirmation modal -->
+      <div id="gif-modal" class="modal hidden">
+        <div class="modal-content">
+          <h3>GIF Detected</h3>
+          <p id="gif-modal-info"></p>
+          <div class="modal-actions">
+            <button id="gif-confirm" class="btn btn-primary">Process</button>
+            <button id="gif-cancel" class="btn">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- GIF progress bar -->
+      <div id="gif-progress" class="gif-progress hidden">
+        <div class="gif-progress-label">
+          <span id="gif-progress-text">Processing frame 0/0...</span>
+          <button id="gif-cancel-btn" class="btn btn-sm">Cancel</button>
+        </div>
+        <div class="gif-progress-bar">
+          <div id="gif-progress-fill" class="gif-progress-fill"></div>
+        </div>
+      </div>
 
       <div class="monitor-row">
         <div class="chart-section">
@@ -137,8 +171,11 @@
     </div>
   </div>
 
+  <script src="lib/gifuct.js"></script>
+  <script src="lib/gif.js"></script>
   <script src="benchmark.js"></script>
   <script src="migration-viz.js"></script>
+  <script src="gif-mode.js"></script>
   <script src="main.js"></script>
 </body>
 </html>

@@ -26,6 +26,8 @@ let workers = [];
 let migrationTimer = null;
 let referenceImage = null;
 let startTime = 0;
+let isGifMode = false;
+const gifProcessor = new GifProcessor();
 
 // Per-island tracking
 let islandState = [];    // { generation, similarity, polygons } per island
@@ -48,15 +50,23 @@ dropZone.addEventListener("drop", (e) => {
   e.preventDefault();
   dropZone.classList.remove("drag-over");
   const file = e.dataTransfer.files[0];
-  if (file && file.type.startsWith("image/")) loadImage(file);
+  if (file && file.type.startsWith("image/")) handleFile(file);
 });
 
 fileInput.addEventListener("change", () => {
   const file = fileInput.files[0];
-  if (file) loadImage(file);
+  if (file) handleFile(file);
 });
 
-// ---- Image Loading ----
+// ---- File Handling ----
+
+function handleFile(file) {
+  if (file.type === "image/gif" || file.name.toLowerCase().endsWith(".gif")) {
+    handleGif(file);
+  } else {
+    loadImage(file);
+  }
+}
 
 function loadImage(file) {
   const reader = new FileReader();
@@ -64,6 +74,7 @@ function loadImage(file) {
     const img = new Image();
     img.onload = () => {
       referenceImage = img;
+      isGifMode = false;
       setupWorkspace(img);
     };
     img.src = e.target.result;
@@ -283,9 +294,13 @@ function resetStats() {
 // ---- Controls ----
 
 startBtn.addEventListener("click", () => {
-  spawnIslands();
-  startBtn.disabled = true;
-  stopBtn.disabled = false;
+  if (isGifMode) {
+    startGifProcessing();
+  } else {
+    spawnIslands();
+    startBtn.disabled = true;
+    stopBtn.disabled = false;
+  }
 });
 
 stopBtn.addEventListener("click", () => {
@@ -319,11 +334,127 @@ newImageBtn.addEventListener("click", () => {
 });
 
 downloadBtn.addEventListener("click", () => {
-  const link = document.createElement("a");
-  link.download = "squint-art.png";
-  link.href = outputCanvas.toDataURL("image/png");
-  link.click();
+  // GIF mode overrides onclick directly; this is the default for static images
+  if (!isGifMode) {
+    const link = document.createElement("a");
+    link.download = "squint-art.png";
+    link.href = outputCanvas.toDataURL("image/png");
+    link.click();
+  }
 });
+
+// ---- GIF Mode ----
+
+const gifModal = document.getElementById("gif-modal");
+const gifModalInfo = document.getElementById("gif-modal-info");
+const gifConfirmBtn = document.getElementById("gif-confirm");
+const gifCancelBtn = document.getElementById("gif-cancel");
+const gifProgress = document.getElementById("gif-progress");
+const gifProgressText = document.getElementById("gif-progress-text");
+const gifProgressFill = document.getElementById("gif-progress-fill");
+const gifCancelRunBtn = document.getElementById("gif-cancel-btn");
+
+let pendingGifBuffer = null;
+
+async function handleGif(file) {
+  const buf = await file.arrayBuffer();
+  const info = await gifProcessor.decode(buf);
+  pendingGifBuffer = buf;
+
+  // Show first frame as reference preview
+  const firstFrame = gifProcessor.frames[0];
+  const maxDisplay = 400;
+  const scale = Math.min(maxDisplay / info.width, maxDisplay / info.height, 1);
+  const dw = Math.round(info.width * scale);
+  const dh = Math.round(info.height * scale);
+  referenceCanvas.width = dw;
+  referenceCanvas.height = dh;
+  outputCanvas.width = dw;
+  outputCanvas.height = dh;
+
+  const tmpCanvas = document.createElement("canvas");
+  tmpCanvas.width = info.width;
+  tmpCanvas.height = info.height;
+  tmpCanvas.getContext("2d").putImageData(firstFrame.imageData, 0, 0);
+  referenceCanvas.getContext("2d").drawImage(tmpCanvas, 0, 0, dw, dh);
+
+  dropZone.classList.add("hidden");
+  workspace.classList.remove("hidden");
+  isGifMode = true;
+
+  requestAnimationFrame(() => {
+    benchmark.resize();
+    migViz.resize();
+  });
+
+  // Show confirmation modal
+  gifModalInfo.textContent = `${info.frameCount} frames at ${info.width}x${info.height}. This will run the GA on each frame sequentially.`;
+  gifModal.classList.remove("hidden");
+}
+
+gifConfirmBtn.addEventListener("click", () => {
+  gifModal.classList.add("hidden");
+  startGifProcessing();
+});
+
+gifCancelBtn.addEventListener("click", () => {
+  gifModal.classList.add("hidden");
+});
+
+gifCancelRunBtn.addEventListener("click", () => {
+  gifProcessor.cancel();
+  gifProgress.classList.add("hidden");
+  startBtn.disabled = false;
+});
+
+async function startGifProcessing() {
+  const config = getConfig();
+  config.generationsPerFrame = parseInt(document.getElementById("gif-gens").value);
+  config.warmStart = document.getElementById("gif-warm").value === "1";
+  config.workRes = parseInt(document.getElementById("work-res").value);
+
+  startBtn.disabled = true;
+  stopBtn.disabled = true;
+  downloadBtn.disabled = true;
+  gifProgress.classList.remove("hidden");
+  gifProgressFill.style.width = "0%";
+  gifProgressText.textContent = "Processing frame 0/" + gifProcessor.frames.length + "...";
+
+  gifProcessor.onProgress = (frameIdx, total, polygons) => {
+    gifProgressText.textContent = `Processing frame ${frameIdx}/${total}...`;
+    gifProgressFill.style.width = ((frameIdx / total) * 100) + "%";
+    renderPolygons(polygons);
+
+    // Show the current reference frame too
+    const frame = gifProcessor.frames[frameIdx - 1];
+    const tmpCanvas = document.createElement("canvas");
+    tmpCanvas.width = gifProcessor.width;
+    tmpCanvas.height = gifProcessor.height;
+    tmpCanvas.getContext("2d").putImageData(frame.imageData, 0, 0);
+    referenceCanvas.getContext("2d").drawImage(
+      tmpCanvas, 0, 0, referenceCanvas.width, referenceCanvas.height,
+    );
+  };
+
+  gifProcessor.onComplete = (blob) => {
+    gifProgress.classList.add("hidden");
+    gifProgressFill.style.width = "100%";
+    startBtn.disabled = false;
+
+    // Enable download as GIF
+    downloadBtn.disabled = false;
+    downloadBtn.onclick = () => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "squint-art.gif";
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+  };
+
+  await gifProcessor.process(config);
+}
 
 // ---- Benchmark controls ----
 
