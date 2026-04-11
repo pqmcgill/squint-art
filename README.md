@@ -6,6 +6,8 @@ Named because the output looks surprisingly good if you squint.
 
 ![Squint Art in action](screenshot.png)
 
+![Earth at 119K generations](screenshot-earth.png)
+
 Oh, and it works on GIFs too.
 
 ![GIF mode demo](squint-art-demo.gif)
