@@ -22,10 +22,16 @@ fs.copyFileSync(
   path.join(dist, "gif.worker.js"),
 );
 
-// Copy fitness.wasm
-fs.copyFileSync(
-  path.join(__dirname, "fitness.wasm"),
-  path.join(dist, "fitness.wasm"),
-);
+// Compile fitness.wat → fitness.wasm
+const wabt = require("wabt");
+wabt().then((w) => {
+  const wat = fs.readFileSync(path.join(__dirname, "fitness.wat"), "utf8");
+  const mod = w.parseWat("fitness.wat", wat);
+  mod.validate();
+  const { buffer } = mod.toBinary({});
+  fs.writeFileSync(path.join(__dirname, "fitness.wasm"), Buffer.from(buffer));
+  fs.copyFileSync(path.join(__dirname, "fitness.wasm"), path.join(dist, "fitness.wasm"));
+  mod.destroy();
+});
 
 console.log("Build complete → dist/");
