@@ -1,10 +1,10 @@
 # Squint Art
 
-**[Try it live](https://pqmcgill.github.io/squint-art/)**
-
 A genetic algorithm that evolves polygon-based art to approximate a reference image, producing an abstract, impressionistic recreation. Drop in any image and watch as semi-transparent polygons are bred, mutated, and selected over thousands of generations to converge on it.
 
 Named because the output looks surprisingly good if you squint.
+
+**[Try it live](https://pqmcgill.github.io/squint-art/)**
 
 ![Squint Art in action](img/screenshot.png)
 
