@@ -28,6 +28,12 @@ Or in one step for development:
 npm run dev      # build + serve
 ```
 
+Run tests:
+
+```bash
+npm test         # runs bun test across all pure modules
+```
+
 Open the app, drag and drop (or click to select) a reference image, and hit **Start**. The algorithm runs across all available CPU cores automatically.
 
 Drop a GIF and it will decode the frames, run the GA on each one, and produce a downloadable polygon GIF.
