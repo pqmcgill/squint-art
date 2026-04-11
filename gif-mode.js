@@ -123,10 +123,9 @@ class GifProcessor {
 
       // Capture the full composited frame
       const fullFrame = compCtx.getImageData(0, 0, w, h);
-      // gifuct delay is centiseconds; gif.js expects milliseconds
-      // Chrome treats delay <= 1cs as 100ms; otherwise use actual value
-      const rawDelay = frame.delay;
-      const delayMs = (rawDelay <= 1) ? 100 : rawDelay * 10;
+      // gifuct-js returns delay in milliseconds already
+      // Chrome treats delay <= 10ms as 100ms
+      const delayMs = (frame.delay <= 10) ? 100 : frame.delay;
       this.frames.push({
         imageData: fullFrame,
         delay: delayMs,
