@@ -285,15 +285,15 @@ canvas {
 #migration-canvas {
   border-radius: 6px;
   background: #141416;
-  align-self: center;
 }
 
 .chart-header {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 0.4rem;
+  min-height: 1.75rem;
 }
 
 .chart-actions {
