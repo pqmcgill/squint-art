@@ -1,5 +1,5 @@
-import { describe, test, expect } from "bun:test";
-import { pixelDiffJS, diffToSimilarity } from "../src/ga/fitness.js";
+import { describe, expect, test } from "bun:test";
+import { diffToSimilarity, pixelDiffJS } from "../src/ga/fitness.js";
 
 describe("pixelDiffJS", () => {
   test("identical buffers produce diff of 0", () => {

@@ -28,8 +28,15 @@ export class GifProcessor {
     this.outputFrames = [];
 
     const {
-      populationSize, numPolygons, numVertices, mutationRate,
-      tournamentSize, fitDiv, subSample, generationsPerFrame, warmStart,
+      populationSize,
+      numPolygons,
+      numVertices,
+      mutationRate,
+      tournamentSize,
+      fitDiv,
+      subSample,
+      generationsPerFrame,
+      warmStart,
     } = config;
 
     const workRes = config.workRes || 128;
@@ -56,11 +63,22 @@ export class GifProcessor {
       tmpCtx.drawImage(srcCanvas, 0, 0, workW, workH);
       const workData = tmpCtx.getImageData(0, 0, workW, workH).data;
 
-      const result = await this._runWorkerOnFrame(workData, workW, workH, {
-        populationSize, numPolygons, numVertices, mutationRate,
-        tournamentSize, fitDiv, subSample,
-        maxGenerations: generationsPerFrame,
-      }, warmStart && prevPolygons ? prevPolygons : null);
+      const result = await this._runWorkerOnFrame(
+        workData,
+        workW,
+        workH,
+        {
+          populationSize,
+          numPolygons,
+          numVertices,
+          mutationRate,
+          tournamentSize,
+          fitDiv,
+          subSample,
+          maxGenerations: generationsPerFrame,
+        },
+        warmStart && prevPolygons ? prevPolygons : null,
+      );
 
       if (!this.running) break;
 
@@ -75,9 +93,15 @@ export class GifProcessor {
       outCtx.fillRect(0, 0, this.width, this.height);
       for (const poly of result.polygons) {
         outCtx.beginPath();
-        outCtx.moveTo(poly.points[0].x * this.width, poly.points[0].y * this.height);
+        outCtx.moveTo(
+          poly.points[0].x * this.width,
+          poly.points[0].y * this.height,
+        );
         for (let j = 1; j < poly.points.length; j++) {
-          outCtx.lineTo(poly.points[j].x * this.width, poly.points[j].y * this.height);
+          outCtx.lineTo(
+            poly.points[j].x * this.width,
+            poly.points[j].y * this.height,
+          );
         }
         outCtx.closePath();
         outCtx.fillStyle = `rgba(${poly.r},${poly.g},${poly.b},${poly.a})`;
@@ -85,7 +109,8 @@ export class GifProcessor {
       }
       this.outputFrames.push({ canvas: outCanvas, delay: frame.delay });
 
-      if (this.onProgress) this.onProgress(i + 1, this.frames.length, result.polygons);
+      if (this.onProgress)
+        this.onProgress(i + 1, this.frames.length, result.polygons);
     }
 
     if (!this.running) return null;
@@ -120,7 +145,9 @@ export class GifProcessor {
       const msg = {
         type: "start",
         imageData: imageData.buffer.slice(0),
-        width, height, config,
+        width,
+        height,
+        config,
       };
       if (warmStartPolygons) msg.warmStart = warmStartPolygons;
       worker.postMessage(msg);

@@ -6,10 +6,10 @@
 //
 
 const { createCanvas, loadImage } = require("@napi-rs/canvas");
-const { Worker: ThreadWorker } = require("worker_threads");
-const os = require("os");
-const fs = require("fs");
-const path = require("path");
+const { Worker: ThreadWorker } = require("node:worker_threads");
+const os = require("node:os");
+const fs = require("node:fs");
+const path = require("node:path");
 const { GA } = require("./ga-engine-node.js");
 
 // ── Config ──────────────────────────────────────────────────────────
@@ -22,12 +22,51 @@ const ISLANDS = Math.max(2, NUM_CORES - 1);
 
 const MATRIX = [
   // Single thread baseline
-  { label: "128px 1t (no migration)",        workRes: 128, populationSize: 50, numPolygons: 50, fitDiv: 2, islands: 1 },
+  {
+    label: "128px 1t (no migration)",
+    workRes: 128,
+    populationSize: 50,
+    numPolygons: 50,
+    fitDiv: 2,
+    islands: 1,
+  },
   // Topology comparison at same island count
-  { label: `128px ${ISLANDS}t star`,         workRes: 128, populationSize: 50, numPolygons: 50, fitDiv: 2, islands: ISLANDS, topology: "star" },
-  { label: `128px ${ISLANDS}t ring`,         workRes: 128, populationSize: 50, numPolygons: 50, fitDiv: 2, islands: ISLANDS, topology: "ring" },
-  { label: `128px ${ISLANDS}t grid`,         workRes: 128, populationSize: 50, numPolygons: 50, fitDiv: 2, islands: ISLANDS, topology: "grid" },
-  { label: `128px ${ISLANDS}t no-migration`, workRes: 128, populationSize: 50, numPolygons: 50, fitDiv: 2, islands: ISLANDS, topology: "none" },
+  {
+    label: `128px ${ISLANDS}t star`,
+    workRes: 128,
+    populationSize: 50,
+    numPolygons: 50,
+    fitDiv: 2,
+    islands: ISLANDS,
+    topology: "star",
+  },
+  {
+    label: `128px ${ISLANDS}t ring`,
+    workRes: 128,
+    populationSize: 50,
+    numPolygons: 50,
+    fitDiv: 2,
+    islands: ISLANDS,
+    topology: "ring",
+  },
+  {
+    label: `128px ${ISLANDS}t grid`,
+    workRes: 128,
+    populationSize: 50,
+    numPolygons: 50,
+    fitDiv: 2,
+    islands: ISLANDS,
+    topology: "grid",
+  },
+  {
+    label: `128px ${ISLANDS}t no-migration`,
+    workRes: 128,
+    populationSize: 50,
+    numPolygons: 50,
+    fitDiv: 2,
+    islands: ISLANDS,
+    topology: "none",
+  },
 ];
 
 const FIXED = { numVertices: 6, mutationRate: 0.03, tournamentSize: 5 };
@@ -44,7 +83,8 @@ const TOPOLOGIES = {
     if (row > 0) out.push((row - 1) * cols + col);
     if ((row + 1) * cols + col < n) out.push((row + 1) * cols + col);
     if (col > 0) out.push(row * cols + col - 1);
-    if (col + 1 < cols && row * cols + col + 1 < n) out.push(row * cols + col + 1);
+    if (col + 1 < cols && row * cols + col + 1 < n)
+      out.push(row * cols + col + 1);
     return out;
   },
   star: (i, n) => {
@@ -61,7 +101,8 @@ function selectSource(candidates, islandPolygons) {
   if (valid.length === 1) return valid[0];
   const a = valid[Math.floor(Math.random() * valid.length)];
   let b = valid[Math.floor(Math.random() * valid.length)];
-  while (b === a && valid.length > 1) b = valid[Math.floor(Math.random() * valid.length)];
+  while (b === a && valid.length > 1)
+    b = valid[Math.floor(Math.random() * valid.length)];
   return Math.random() < 0.7 ? a : b;
 }
 
@@ -155,9 +196,17 @@ function runIsland(img, entry) {
           done++;
           if (done === numIslands) {
             clearInterval(migTimer);
-            const totalGens = finalResults.reduce((s, r) => s + r.generations, 0);
-            const totalGenPerSec = finalResults.reduce((s, r) => s + r.genPerSec, 0);
-            const bestSim = Math.max(...finalResults.map((r) => r.fullSimilarity));
+            const totalGens = finalResults.reduce(
+              (s, r) => s + r.generations,
+              0,
+            );
+            const totalGenPerSec = finalResults.reduce(
+              (s, r) => s + r.genPerSec,
+              0,
+            );
+            const bestSim = Math.max(
+              ...finalResults.map((r) => r.fullSimilarity),
+            );
 
             resolve({
               label: entry.label,
@@ -181,7 +230,10 @@ function runIsland(img, entry) {
         const neighbors = neighborFn(i, numIslands);
         const source = selectSource(neighbors, islandPolygons);
         if (source !== null && islandPolygons[source]) {
-          threads[i].postMessage({ type: "migrate", polygons: islandPolygons[source] });
+          threads[i].postMessage({
+            type: "migrate",
+            polygons: islandPolygons[source],
+          });
         }
       }
     }, migrationInterval);
@@ -193,15 +245,20 @@ function runIsland(img, entry) {
 async function main() {
   await loadWasm();
 
-  const imagePath = process.argv[2] || path.join(__dirname, "..", "..", "img", "reference.jpg");
+  const imagePath =
+    process.argv[2] || path.join(__dirname, "..", "..", "img", "reference.jpg");
   const img = await loadImage(imagePath);
 
   const total = MATRIX.length;
-  const estMin = ((WARMUP + DURATION) * total / 60000).toFixed(1);
+  const estMin = (((WARMUP + DURATION) * total) / 60000).toFixed(1);
 
   console.log("Polygon GA Benchmark (Island Model)");
-  console.log(`Image: ${path.basename(imagePath)} (${img.width}x${img.height})`);
-  console.log(`Duration: ${DURATION / 1000}s per run + ${WARMUP / 1000}s warmup`);
+  console.log(
+    `Image: ${path.basename(imagePath)} (${img.width}x${img.height})`,
+  );
+  console.log(
+    `Duration: ${DURATION / 1000}s per run + ${WARMUP / 1000}s warmup`,
+  );
   console.log(`Cores: ${NUM_CORES}  Islands: ${ISLANDS}`);
   console.log(`Runs: ${total}  (~${estMin} min total)`);
   console.log(`Node ${process.version}  ${process.platform}/${process.arch}\n`);
@@ -212,19 +269,18 @@ async function main() {
     const entry = MATRIX[i];
     process.stdout.write(`[${i + 1}/${total}] ${entry.label.padEnd(32)} `);
 
-    const r = entry.islands > 1
-      ? await runIsland(img, entry)
-      : runSingle(img, entry);
+    const r =
+      entry.islands > 1 ? await runIsland(img, entry) : runSingle(img, entry);
 
     results.push(r);
     console.log(
-      `${String(r.genPerSec).padStart(7)} gen/s  ${(r.similarity + "%").padStart(8)}  ${r.generations.toLocaleString().padStart(10)} gens`,
+      `${String(r.genPerSec).padStart(7)} gen/s  ${(`${r.similarity}%`).padStart(8)}  ${r.generations.toLocaleString().padStart(10)} gens`,
     );
   }
 
   // Summary table
   const sep = "\u2500".repeat(84);
-  console.log("\n" + sep);
+  console.log(`\n${sep}`);
   console.log(
     `${"#".padStart(3)}  ${"Config".padEnd(32)}  ${"Gen/s".padStart(8)}  ${"Sim %".padStart(8)}  ${"Gens".padStart(10)}  ${"Size".padStart(7)}`,
   );
@@ -232,7 +288,7 @@ async function main() {
   for (let i = 0; i < results.length; i++) {
     const r = results[i];
     console.log(
-      `${String(i + 1).padStart(3)}  ${r.label.padEnd(32)}  ${String(r.genPerSec).padStart(8)}  ${(r.similarity + "%").padStart(8)}  ${r.generations.toLocaleString().padStart(10)}  ${r.workSize.padStart(7)}`,
+      `${String(i + 1).padStart(3)}  ${r.label.padEnd(32)}  ${String(r.genPerSec).padStart(8)}  ${(`${r.similarity}%`).padStart(8)}  ${r.generations.toLocaleString().padStart(10)}  ${r.workSize.padStart(7)}`,
     );
   }
   console.log(sep);

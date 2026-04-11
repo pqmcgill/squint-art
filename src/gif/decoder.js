@@ -1,6 +1,6 @@
 // GIF decoder — wraps gifuct-js, returns composited frames with delays.
 
-import { parseGIF, decompressFrames } from "gifuct-js";
+import { decompressFrames, parseGIF } from "gifuct-js";
 
 export function decodeGif(arrayBuffer) {
   const gif = parseGIF(arrayBuffer);
@@ -37,7 +37,7 @@ export function decodeGif(arrayBuffer) {
     const fullFrame = compCtx.getImageData(0, 0, w, h);
 
     // gifuct-js returns delay in ms; Chrome treats <= 10ms as 100ms
-    const delayMs = (frame.delay <= 10) ? 100 : frame.delay;
+    const delayMs = frame.delay <= 10 ? 100 : frame.delay;
 
     frames.push({ imageData: fullFrame, delay: delayMs });
   }

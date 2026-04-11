@@ -1,7 +1,14 @@
-import { describe, test, expect } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import {
-  clamp, createRandomPolygon, clonePolygon, cloneIndividual,
-  createIndividual, crossover, mutate, tournamentSelect, polyFill,
+  clamp,
+  cloneIndividual,
+  clonePolygon,
+  createIndividual,
+  createRandomPolygon,
+  crossover,
+  mutate,
+  polyFill,
+  tournamentSelect,
 } from "../src/ga/operators.js";
 
 describe("clamp", () => {
@@ -113,8 +120,14 @@ describe("crossover", () => {
     // Give parents distinctive colors to verify sourcing
     const p1 = createIndividual(20, 4);
     const p2 = createIndividual(20, 4);
-    p1.polygons.forEach((p) => { p.r = 0; polyFill(p); });
-    p2.polygons.forEach((p) => { p.r = 255; polyFill(p); });
+    p1.polygons.forEach((p) => {
+      p.r = 0;
+      polyFill(p);
+    });
+    p2.polygons.forEach((p) => {
+      p.r = 255;
+      polyFill(p);
+    });
 
     const child = crossover(p1, p2);
     for (const poly of child.polygons) {

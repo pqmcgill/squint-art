@@ -8,7 +8,7 @@ export class BenchmarkData {
 
   startRun(config) {
     this.activeRun = {
-      label: "Run " + (this.runs.length + 1),
+      label: `Run ${this.runs.length + 1}`,
       config: { ...config },
       t0: performance.now(),
       points: [],

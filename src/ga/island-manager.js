@@ -1,14 +1,14 @@
 // Island model — spawn/kill workers, coordinate migration.
 
-import { TOPOLOGIES, selectSource } from "./topology.js";
+import { selectSource, TOPOLOGIES } from "./topology.js";
 
 export class IslandManager {
   constructor() {
     this.workers = [];
-    this.islandState = [];  // { generation, similarity, polygons } per island
+    this.islandState = []; // { generation, similarity, polygons } per island
     this.globalBest = null;
     this._migrationTimer = null;
-    this.onUpdate = null;   // (islandIndex, msg) => void
+    this.onUpdate = null; // (islandIndex, msg) => void
   }
 
   get numIslands() {
@@ -21,7 +21,7 @@ export class IslandManager {
     this.islandState = new Array(numIslands).fill(null);
     this.globalBest = null;
 
-    const topoFn = TOPOLOGIES[topology] || TOPOLOGIES.ring;
+    const _topoFn = TOPOLOGIES[topology] || TOPOLOGIES.ring;
 
     for (let i = 0; i < numIslands; i++) {
       const w = new Worker("dist/worker.js");
@@ -36,7 +36,10 @@ export class IslandManager {
           };
 
           if (!this.globalBest || msg.similarity > this.globalBest.similarity) {
-            this.globalBest = { similarity: msg.similarity, polygons: msg.polygons };
+            this.globalBest = {
+              similarity: msg.similarity,
+              polygons: msg.polygons,
+            };
           }
 
           if (this.onUpdate) this.onUpdate(i, msg);

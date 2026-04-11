@@ -1,11 +1,11 @@
 // App controller — all DOM wiring. Imports everything, owns nothing.
 
-import { IslandManager, getDefaultIslandCount } from "./ga/island-manager.js";
 import { BenchmarkData } from "./chart/data.js";
-import { ChartRenderer } from "./chart/renderer.js";
 import { MigrationViz } from "./chart/migration-viz.js";
-import { GifProcessor } from "./gif/processor.js";
+import { ChartRenderer } from "./chart/renderer.js";
+import { getDefaultIslandCount, IslandManager } from "./ga/island-manager.js";
 import { GifPlayer } from "./gif/player.js";
+import { GifProcessor } from "./gif/processor.js";
 import { renderPolygons } from "./render.js";
 
 // ---- DOM refs ----
@@ -54,13 +54,16 @@ let startTime = 0;
 
 function getConfig() {
   return {
-    populationSize: parseInt(document.getElementById("pop-size").value),
-    numPolygons: parseInt(document.getElementById("num-polygons").value),
-    numVertices: parseInt(document.getElementById("num-vertices").value),
+    populationSize: parseInt(document.getElementById("pop-size").value, 10),
+    numPolygons: parseInt(document.getElementById("num-polygons").value, 10),
+    numVertices: parseInt(document.getElementById("num-vertices").value, 10),
     mutationRate: parseFloat(document.getElementById("mutation-rate").value),
-    tournamentSize: parseInt(document.getElementById("tournament-size").value),
-    fitDiv: parseInt(document.getElementById("fit-div").value),
-    subSample: parseInt(document.getElementById("sub-sample").value),
+    tournamentSize: parseInt(
+      document.getElementById("tournament-size").value,
+      10,
+    ),
+    fitDiv: parseInt(document.getElementById("fit-div").value, 10),
+    subSample: parseInt(document.getElementById("sub-sample").value, 10),
   };
 }
 
@@ -69,7 +72,7 @@ function getTopology() {
 }
 
 function getWorkImageData() {
-  const workRes = parseInt(document.getElementById("work-res").value);
+  const workRes = parseInt(document.getElementById("work-res").value, 10);
   const img = referenceImage;
   const scale = Math.min(workRes / img.width, workRes / img.height, 1);
   const w = Math.round(img.width * scale);
@@ -78,11 +81,20 @@ function getWorkImageData() {
   tmp.width = w;
   tmp.height = h;
   tmp.getContext("2d").drawImage(img, 0, 0, w, h);
-  return { data: tmp.getContext("2d").getImageData(0, 0, w, h).data, width: w, height: h };
+  return {
+    data: tmp.getContext("2d").getImageData(0, 0, w, h).data,
+    width: w,
+    height: h,
+  };
 }
 
 function render(polygons) {
-  renderPolygons(outputCanvas.getContext("2d"), outputCanvas.width, outputCanvas.height, polygons);
+  renderPolygons(
+    outputCanvas.getContext("2d"),
+    outputCanvas.width,
+    outputCanvas.height,
+    polygons,
+  );
 }
 
 function resetStats() {
@@ -97,7 +109,7 @@ function updateStats() {
   genCountEl.textContent = totalGens.toLocaleString();
 
   if (islands.globalBest) {
-    similarityEl.textContent = islands.globalBest.similarity + "%";
+    similarityEl.textContent = `${islands.globalBest.similarity}%`;
     benchData.record(totalGens, islands.globalBest.similarity);
     chart.scheduleDraw();
   }
@@ -111,13 +123,18 @@ function updateStats() {
 // ---- Drop Zone ----
 
 dropZone.addEventListener("click", () => fileInput.click());
-dropZone.addEventListener("dragover", (e) => { e.preventDefault(); dropZone.classList.add("drag-over"); });
-dropZone.addEventListener("dragleave", () => dropZone.classList.remove("drag-over"));
+dropZone.addEventListener("dragover", (e) => {
+  e.preventDefault();
+  dropZone.classList.add("drag-over");
+});
+dropZone.addEventListener("dragleave", () =>
+  dropZone.classList.remove("drag-over"),
+);
 dropZone.addEventListener("drop", (e) => {
   e.preventDefault();
   dropZone.classList.remove("drag-over");
   const file = e.dataTransfer.files[0];
-  if (file && file.type.startsWith("image/")) handleFile(file);
+  if (file?.type.startsWith("image/")) handleFile(file);
 });
 fileInput.addEventListener("change", () => {
   if (fileInput.files[0]) handleFile(fileInput.files[0]);
@@ -162,7 +179,10 @@ function setupWorkspace(img) {
   dropZone.classList.add("hidden");
   workspace.classList.remove("hidden");
 
-  requestAnimationFrame(() => { chart.resize(); migViz.resize(); });
+  requestAnimationFrame(() => {
+    chart.resize();
+    migViz.resize();
+  });
   resetStats();
 }
 
@@ -221,7 +241,9 @@ resetBtn.addEventListener("click", () => {
   startBtn.disabled = false;
   stopBtn.disabled = true;
   downloadBtn.disabled = true;
-  outputCanvas.getContext("2d").clearRect(0, 0, outputCanvas.width, outputCanvas.height);
+  outputCanvas
+    .getContext("2d")
+    .clearRect(0, 0, outputCanvas.width, outputCanvas.height);
   resetStats();
 });
 
@@ -262,7 +284,10 @@ async function handleGif(file) {
   const dw = Math.round(info.width * scale);
   const dh = Math.round(info.height * scale);
 
-  const refFrames = gifProcessor.frames.map((f) => ({ source: f.imageData, delay: f.delay }));
+  const refFrames = gifProcessor.frames.map((f) => ({
+    source: f.imageData,
+    delay: f.delay,
+  }));
   referenceCanvas.width = dw;
   referenceCanvas.height = dh;
   outputCanvas.width = dw;
@@ -274,7 +299,10 @@ async function handleGif(file) {
   workspace.classList.remove("hidden");
   isGifMode = true;
 
-  requestAnimationFrame(() => { chart.resize(); migViz.resize(); });
+  requestAnimationFrame(() => {
+    chart.resize();
+    migViz.resize();
+  });
   resetStats();
 }
 
@@ -296,9 +324,12 @@ gifCancelRunBtn.addEventListener("click", () => {
 
 async function startGifProcessing() {
   const config = getConfig();
-  config.generationsPerFrame = parseInt(document.getElementById("gif-gens").value);
+  config.generationsPerFrame = parseInt(
+    document.getElementById("gif-gens").value,
+    10,
+  );
   config.warmStart = document.getElementById("gif-warm").value === "1";
-  config.workRes = parseInt(document.getElementById("work-res").value);
+  config.workRes = parseInt(document.getElementById("work-res").value, 10);
 
   refPlayer.stop();
   outPlayer.stop();
@@ -308,11 +339,11 @@ async function startGifProcessing() {
   downloadBtn.disabled = true;
   gifProgress.classList.remove("hidden");
   gifProgressFill.style.width = "0%";
-  gifProgressText.textContent = "Processing frame 0/" + gifProcessor.frames.length + "...";
+  gifProgressText.textContent = `Processing frame 0/${gifProcessor.frames.length}...`;
 
   gifProcessor.onProgress = (frameIdx, total, polygons) => {
     gifProgressText.textContent = `Processing frame ${frameIdx}/${total}...`;
-    gifProgressFill.style.width = ((frameIdx / total) * 100) + "%";
+    gifProgressFill.style.width = `${(frameIdx / total) * 100}%`;
     render(polygons);
 
     const frame = gifProcessor.frames[frameIdx - 1];
@@ -320,16 +351,34 @@ async function startGifProcessing() {
     tmpCanvas.width = gifProcessor.width;
     tmpCanvas.height = gifProcessor.height;
     tmpCanvas.getContext("2d").putImageData(frame.imageData, 0, 0);
-    referenceCanvas.getContext("2d").drawImage(tmpCanvas, 0, 0, referenceCanvas.width, referenceCanvas.height);
+    referenceCanvas
+      .getContext("2d")
+      .drawImage(
+        tmpCanvas,
+        0,
+        0,
+        referenceCanvas.width,
+        referenceCanvas.height,
+      );
   };
 
   gifProcessor.onComplete = (blob) => {
     gifProgress.classList.add("hidden");
     startBtn.disabled = false;
 
-    const refFrames = gifProcessor.frames.map((f) => ({ source: f.imageData, delay: f.delay }));
-    const outFrames = gifProcessor.outputFrames.map((f) => ({ source: f.canvas, delay: f.delay }));
-    refPlayer.setFrames(refFrames, referenceCanvas.width, referenceCanvas.height);
+    const refFrames = gifProcessor.frames.map((f) => ({
+      source: f.imageData,
+      delay: f.delay,
+    }));
+    const outFrames = gifProcessor.outputFrames.map((f) => ({
+      source: f.canvas,
+      delay: f.delay,
+    }));
+    refPlayer.setFrames(
+      refFrames,
+      referenceCanvas.width,
+      referenceCanvas.height,
+    );
     outPlayer.setFrames(outFrames, outputCanvas.width, outputCanvas.height);
     refPlayer.play();
     outPlayer.play();
@@ -352,7 +401,9 @@ async function startGifProcessing() {
 
 document.querySelectorAll(".toggle-btn").forEach((btn) => {
   btn.addEventListener("click", () => {
-    document.querySelectorAll(".toggle-btn").forEach((b) => b.classList.remove("active"));
+    document.querySelectorAll(".toggle-btn").forEach((b) => {
+      b.classList.remove("active");
+    });
     btn.classList.add("active");
     chart.setXAxis(btn.dataset.axis);
   });
@@ -374,7 +425,10 @@ document.getElementById("clear-chart-btn").addEventListener("click", () => {
   chart.draw();
 });
 
-window.addEventListener("resize", () => { chart.resize(); migViz.resize(); });
+window.addEventListener("resize", () => {
+  chart.resize();
+  migViz.resize();
+});
 
 // ---- Battery saver: pause workers when tab is hidden ----
 
