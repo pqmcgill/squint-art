@@ -6,7 +6,7 @@
 - [ ] Pre-commit hook running `bun test`
 - [ ] `.nvmrc` or `package.json` engines field to pin Node/Bun versions
 - [ ] License file (MIT)
-- [ ] Contributing guide
+- [x] Contributing guide
 
 ## Documentation
 
