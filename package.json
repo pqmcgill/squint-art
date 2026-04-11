@@ -5,6 +5,7 @@
     "build": "node build.js",
     "dev": "node build.js && npx serve .",
     "start": "npx serve .",
+    "test": "bun test",
     "bench": "node bench.js"
   },
   "dependencies": {
