@@ -6,14 +6,27 @@ Named because the output looks surprisingly good if you squint.
 
 ![Squint Art in action](screenshot.png)
 
+Oh, and it works on GIFs too.
+
+![GIF mode demo](squint-art-demo.gif)
+
 ## Quick Start
 
 ```bash
 npm install
+npm run build    # bundles src/ into dist/ via bun
 npm start        # serves on http://localhost:3000
 ```
 
+Or in one step for development:
+
+```bash
+npm run dev      # build + serve
+```
+
 Open the app, drag and drop (or click to select) a reference image, and hit **Start**. The algorithm runs across all available CPU cores automatically.
+
+Drop a GIF and it will decode the frames, run the GA on each one, and produce a downloadable polygon GIF.
 
 ## How It Works
 
@@ -68,19 +81,50 @@ This runs a matrix of configurations, reports gen/s and full-resolution similari
 
 The built-in performance chart (below the controls in the UI) tracks similarity over generations/time. Each Start creates a new run drawn as a separate line, so you can visually compare different parameter settings. The Y-axis auto-scales to the actual data range. Export as JSON for post-hoc analysis.
 
+## GIF Mode
+
+Drop a GIF instead of a static image and Squint Art switches to frame-by-frame mode:
+
+1. The GIF is decoded into individual frames with their original timing
+2. A confirmation dialog shows the frame count — you can tweak settings first
+3. The GA runs on each frame for a configurable number of generations
+4. **Warm start**: each frame's population is seeded from the previous frame's best individual (with mutations for diversity), giving temporal coherence so the output doesn't flicker between frames
+5. The output frames are encoded back into a GIF with matching frame delays
+6. Both GIFs play side-by-side for comparison, and the output is downloadable
+
+GIF-specific settings:
+- **Generations/Frame** (default 500): more = better quality per frame, slower overall
+- **Warm Start** (default On): toggle temporal coherence between frames
+
 ## Architecture
 
 ```
-index.html          UI: drop zone, canvases, controls, settings
-style.css           Dark theme styling
-main.js             UI logic, island model orchestration, migration
-ga-worker.js        Web Worker: GA engine (browser)
-fitness.wat/.wasm   Hand-written WebAssembly pixel diff (188 bytes)
-benchmark.js        Canvas-based performance chart renderer
-ga-engine-node.js   Shared GA engine for Node.js (bench + worker threads)
-bench.js            Headless benchmark runner
-bench-worker.js     Worker thread for island model benchmarks
+src/
+  app.js                   DOM wiring controller
+  render.js                Shared polygon→canvas renderer
+  ga/
+    operators.js           Pure: polygon CRUD, crossover, mutation
+    topology.js            Pure: ring/grid/star neighbors, migration selection
+    fitness.js             Pure: pixel diff, similarity math
+    island-manager.js      Worker spawning + migration coordination
+    worker.js              Web Worker entry point (bundled separately)
+  gif/
+    decoder.js             GIF frame extraction (gifuct-js)
+    encoder.js             GIF encoding (gif.js)
+    player.js              Canvas-based GIF playback
+    processor.js           Frame-by-frame GA orchestration
+  chart/
+    data.js                Pure: benchmark run data collection
+    renderer.js            Performance chart canvas renderer
+    migration-viz.js       Island topology visualization
+
+build.js                   Bun build script (two entry points: app + worker)
+fitness.wat/.wasm          Hand-written WebAssembly pixel diff (188 bytes)
+ga-engine-node.js          Shared GA engine for Node.js benchmarks
+bench.js / bench-worker.js Headless benchmark runner with worker_threads
 ```
+
+Pure modules (`operators`, `topology`, `fitness`, `chart/data`) are independently unit-testable without DOM mocking.
 
 ---
 
