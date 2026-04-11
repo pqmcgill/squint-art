@@ -4,6 +4,8 @@ A genetic algorithm that evolves polygon-based art to approximate a reference im
 
 Named because the output looks surprisingly good if you squint.
 
+![Squint Art in action](screenshot.png)
+
 ## Quick Start
 
 ```bash
