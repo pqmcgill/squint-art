@@ -88,7 +88,7 @@ bench-worker.js     Worker thread for island model benchmarks
 
 This section documents the progressive optimization journey, with measured results at each step. All benchmarks use the same reference image (201x251 polygon lion) at the baseline config of 128px / 50 population / 50 polygons, measured over 30-second runs with 3-second warmup on an Apple M-series (10-core) machine.
 
-### Phase 0: Baseline (Pure JS)
+### Phase 0: Baseline (Pure JS) [`eaa9f86`](../../commit/eaa9f86)
 
 The initial implementation: a single Web Worker running the GA with Canvas 2D rendering and a JavaScript pixel-diff loop.
 
@@ -99,7 +99,7 @@ Profiling the hot path reveals three components per fitness evaluation:
 2. `getImageData()` readback (copy pixels from canvas to JS)
 3. Pixel comparison loop (iterate all pixels, compute squared RGB differences)
 
-### Phase 1: JS Micro-optimizations
+### Phase 1: JS Micro-optimizations [`4d0097d`](../../commit/4d0097d)
 
 **Changes:**
 - Cache `fillStyle` strings on polygon objects (`rgba(r,g,b,a)`), rebuild only when color mutates
@@ -111,7 +111,7 @@ The fillStyle cache showed a measurable win only at very small resolutions (64px
 
 **Learning:** JS-level micro-optimizations are dominated by the Canvas 2D API cost. The engine (V8) already JIT-compiles the arithmetic loop effectively.
 
-### Phase 2: WebAssembly Pixel Diff
+### Phase 2: WebAssembly Pixel Diff [`16f3f1d`](../../commit/16f3f1d)
 
 **Changes:**
 - Hand-wrote a 188-byte Wasm module (`fitness.wat`) for the pixel comparison loop
@@ -124,7 +124,7 @@ A real but modest gain. The Wasm loop itself is faster than JS, but we pay for c
 
 **Learning:** When the bottleneck is I/O (canvas rendering + readback), optimizing the compute (diff loop) yields diminishing returns. The copy overhead from JS to Wasm partially negates the faster execution.
 
-### Phase 3: Subsampled Pixel Comparison
+### Phase 3: Subsampled Pixel Comparison [`e6e147a`](../../commit/e6e147a)
 
 **Changes:**
 - Added a `step` parameter to the Wasm function (compare every Nth pixel instead of all)
@@ -143,7 +143,7 @@ Marginal improvement. Even comparing only 25% of pixels barely moves the needle 
 
 **Learning:** Subsampling the comparison is pointless if you still render and read back all the pixels. The optimization must cut work *before* the diff loop.
 
-### Phase 4: Reduced-Resolution Fitness Rendering
+### Phase 4: Reduced-Resolution Fitness Rendering [`e6e147a`](../../commit/e6e147a)
 
 **Changes:**
 - Added a separate smaller canvas for fitness evaluation (`fitDiv` config)
@@ -169,7 +169,7 @@ Similarity is *equal or better* with downscaling because the extra generations (
 
 **Learning:** This was the single biggest win. When the bottleneck spans rendering, readback, and comparison, you need an optimization that reduces all three simultaneously. Rendering at lower resolution does exactly that. The GA's selection mechanism is robust to noise in the fitness function — it only needs to rank individuals correctly, not measure them precisely.
 
-### Phase 5: Island Model (Multi-Core Parallelism)
+### Phase 5: Island Model (Multi-Core Parallelism) [`b1bd184`](../../commit/b1bd184)
 
 **Changes:**
 - Browser: auto-detect `navigator.hardwareConcurrency`, spawn N-1 Web Workers each running an independent population
