@@ -80,6 +80,22 @@ self.onmessage = async function (e) {
     runGA();
   } else if (type === "stop") {
     running = false;
+  } else if (type === "migrate") {
+    // Replace worst individual with incoming migrant
+    if (population.length > 0 && data.polygons) {
+      let worstIdx = 0;
+      for (let i = 1; i < fitnesses.length; i++) {
+        if (fitnesses[i] > fitnesses[worstIdx]) worstIdx = i;
+      }
+      const migrant = {
+        polygons: data.polygons.map((p) => polyFill({
+          points: p.points.map((pt) => ({ x: pt.x, y: pt.y })),
+          r: p.r, g: p.g, b: p.b, a: p.a,
+        })),
+      };
+      population[worstIdx] = migrant;
+      fitnesses[worstIdx] = Infinity; // re-evaluated next generation
+    }
   }
 };
 

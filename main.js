@@ -1,4 +1,4 @@
-// Main UI logic — image handling, worker management, rendering
+// Main UI logic — image handling, island model worker management, rendering
 
 const dropZone = document.getElementById("drop-zone");
 const fileInput = document.getElementById("file-input");
@@ -12,14 +12,20 @@ const newImageBtn = document.getElementById("new-image-btn");
 const genCountEl = document.getElementById("gen-count");
 const similarityEl = document.getElementById("similarity-value");
 const gpsEl = document.getElementById("gens-per-sec");
+const islandsEl = document.getElementById("islands-value");
 const bestLabel = document.getElementById("best-label");
 const chartCanvas = document.getElementById("chart-canvas");
 
 const benchmark = new Benchmark(chartCanvas);
 
-let worker = null;
+let workers = [];
+let migrationTimer = null;
 let referenceImage = null;
 let startTime = 0;
+
+// Per-island tracking
+let islandGens = [];     // generation count per island
+let globalBest = null;   // { similarity, polygons }
 
 // ---- Drag & Drop ----
 
@@ -77,9 +83,7 @@ function setupWorkspace(img) {
   dropZone.classList.add("hidden");
   workspace.classList.remove("hidden");
 
-  // Chart canvas needs layout before it can size itself
   requestAnimationFrame(() => benchmark.resize());
-
   resetStats();
 }
 
@@ -112,45 +116,86 @@ function getWorkImageData() {
   return { data: tctx.getImageData(0, 0, w, h).data, width: w, height: h };
 }
 
-// ---- Worker Management ----
+// ---- Island Model Worker Management ----
 
-function spawnWorker() {
-  killWorker();
+function getNumIslands() {
+  return Math.max(1, (navigator.hardwareConcurrency || 4) - 1);
+}
+
+function spawnIslands() {
+  killIslands();
 
   const { data, width, height } = getWorkImageData();
   const config = getConfig();
+  const numIslands = getNumIslands();
+  const migrationInterval = 5000; // ms
 
-  benchmark.startRun(config);
+  benchmark.startRun({ ...config, islands: numIslands });
 
-  worker = new Worker("ga-worker.js");
+  islandGens = new Array(numIslands).fill(0);
+  globalBest = null;
 
-  worker.onmessage = (e) => {
-    const msg = e.data;
-    if (msg.type === "update") {
-      genCountEl.textContent = msg.generation.toLocaleString();
-      similarityEl.textContent = msg.similarity + "%";
+  for (let i = 0; i < numIslands; i++) {
+    const w = new Worker("ga-worker.js");
 
-      const elapsed = (Date.now() - startTime) / 1000;
-      if (elapsed > 0) {
-        gpsEl.textContent = Math.round(msg.generation / elapsed);
+    w.onmessage = (e) => {
+      const msg = e.data;
+      if (msg.type === "update") {
+        islandGens[i] = msg.generation;
+        if (!globalBest || msg.similarity > globalBest.similarity) {
+          globalBest = { similarity: msg.similarity, polygons: msg.polygons };
+          renderPolygons(msg.polygons);
+        }
+        updateStats();
       }
+    };
 
-      renderPolygons(msg.polygons);
-      benchmark.record(msg.generation, msg.similarity);
-    }
-  };
+    // Each worker gets its own copy of the image buffer
+    w.postMessage({
+      type: "start",
+      imageData: data.buffer.slice(0),
+      width,
+      height,
+      config,
+    });
 
-  // Transfer the underlying ArrayBuffer for zero-copy
-  const buffer = data.buffer;
-  worker.postMessage({ type: "start", imageData: buffer, width, height, config }, [buffer]);
+    workers.push(w);
+  }
+
+  islandsEl.textContent = numIslands;
   startTime = Date.now();
+
+  // Periodic migration: send global best to all islands
+  migrationTimer = setInterval(() => {
+    if (!globalBest || workers.length < 2) return;
+    for (const w of workers) {
+      w.postMessage({ type: "migrate", polygons: globalBest.polygons });
+    }
+  }, migrationInterval);
 }
 
-function killWorker() {
-  if (worker) {
-    worker.terminate();
-    worker = null;
-    benchmark.stopRun();
+function killIslands() {
+  if (migrationTimer) {
+    clearInterval(migrationTimer);
+    migrationTimer = null;
+  }
+  for (const w of workers) w.terminate();
+  workers = [];
+  benchmark.stopRun();
+}
+
+function updateStats() {
+  const totalGens = islandGens.reduce((a, b) => a + b, 0);
+  genCountEl.textContent = totalGens.toLocaleString();
+
+  if (globalBest) {
+    similarityEl.textContent = globalBest.similarity + "%";
+    benchmark.record(totalGens, globalBest.similarity);
+  }
+
+  const elapsed = (Date.now() - startTime) / 1000;
+  if (elapsed > 0) {
+    gpsEl.textContent = Math.round(totalGens / elapsed);
   }
 }
 
@@ -182,24 +227,25 @@ function resetStats() {
   genCountEl.textContent = "0";
   similarityEl.textContent = "\u2014";
   gpsEl.textContent = "\u2014";
+  islandsEl.textContent = "\u2014";
 }
 
 // ---- Controls ----
 
 startBtn.addEventListener("click", () => {
-  spawnWorker();
+  spawnIslands();
   startBtn.disabled = true;
   stopBtn.disabled = false;
 });
 
 stopBtn.addEventListener("click", () => {
-  killWorker();
+  killIslands();
   startBtn.disabled = false;
   stopBtn.disabled = true;
 });
 
 resetBtn.addEventListener("click", () => {
-  killWorker();
+  killIslands();
   startBtn.disabled = false;
   stopBtn.disabled = true;
   const ctx = outputCanvas.getContext("2d");
@@ -208,7 +254,7 @@ resetBtn.addEventListener("click", () => {
 });
 
 newImageBtn.addEventListener("click", () => {
-  killWorker();
+  killIslands();
   startBtn.disabled = false;
   stopBtn.disabled = true;
   workspace.classList.add("hidden");

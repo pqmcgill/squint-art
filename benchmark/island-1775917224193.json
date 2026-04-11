@@ -1,0 +1,126 @@
+{
+  "image": "reference.jpg",
+  "date": "2026-04-11T14:20:24.193Z",
+  "node": "v22.14.0",
+  "platform": "darwin/arm64",
+  "cores": 10,
+  "islands": 9,
+  "durationMs": 30000,
+  "warmupMs": 3000,
+  "results": [
+    {
+      "label": "128px 50pop 50poly 1t",
+      "config": {
+        "numVertices": 6,
+        "mutationRate": 0.03,
+        "tournamentSize": 5,
+        "label": "128px 50pop 50poly 1t",
+        "workRes": 128,
+        "populationSize": 50,
+        "numPolygons": 50,
+        "fitDiv": 2,
+        "islands": 1
+      },
+      "workSize": "103x128",
+      "generations": 2769,
+      "genPerSec": 92.3,
+      "similarity": 97.82,
+      "elapsedSec": 30
+    },
+    {
+      "label": "128px 50pop 50poly 9t",
+      "config": {
+        "numVertices": 6,
+        "mutationRate": 0.03,
+        "tournamentSize": 5,
+        "label": "128px 50pop 50poly 9t",
+        "workRes": 128,
+        "populationSize": 50,
+        "numPolygons": 50,
+        "fitDiv": 2,
+        "islands": 9
+      },
+      "workSize": "103x128",
+      "generations": 14944,
+      "genPerSec": 497.9,
+      "similarity": 97.69,
+      "elapsedSec": 30
+    },
+    {
+      "label": "256px 50pop 50poly 1t",
+      "config": {
+        "numVertices": 6,
+        "mutationRate": 0.03,
+        "tournamentSize": 5,
+        "label": "256px 50pop 50poly 1t",
+        "workRes": 256,
+        "populationSize": 50,
+        "numPolygons": 50,
+        "fitDiv": 2,
+        "islands": 1
+      },
+      "workSize": "201x251",
+      "generations": 1309,
+      "genPerSec": 43.6,
+      "similarity": 97.42,
+      "elapsedSec": 30
+    },
+    {
+      "label": "256px 50pop 50poly 9t",
+      "config": {
+        "numVertices": 6,
+        "mutationRate": 0.03,
+        "tournamentSize": 5,
+        "label": "256px 50pop 50poly 9t",
+        "workRes": 256,
+        "populationSize": 50,
+        "numPolygons": 50,
+        "fitDiv": 2,
+        "islands": 9
+      },
+      "workSize": "201x251",
+      "generations": 8171,
+      "genPerSec": 272.2,
+      "similarity": 97.52,
+      "elapsedSec": 30
+    },
+    {
+      "label": "128px 50pop 100poly 1t",
+      "config": {
+        "numVertices": 6,
+        "mutationRate": 0.03,
+        "tournamentSize": 5,
+        "label": "128px 50pop 100poly 1t",
+        "workRes": 128,
+        "populationSize": 50,
+        "numPolygons": 100,
+        "fitDiv": 2,
+        "islands": 1
+      },
+      "workSize": "103x128",
+      "generations": 1506,
+      "genPerSec": 50.2,
+      "similarity": 97.69,
+      "elapsedSec": 30
+    },
+    {
+      "label": "128px 50pop 100poly 9t",
+      "config": {
+        "numVertices": 6,
+        "mutationRate": 0.03,
+        "tournamentSize": 5,
+        "label": "128px 50pop 100poly 9t",
+        "workRes": 128,
+        "populationSize": 50,
+        "numPolygons": 100,
+        "fitDiv": 2,
+        "islands": 9
+      },
+      "workSize": "103x128",
+      "generations": 7706,
+      "genPerSec": 256.7,
+      "similarity": 97.64,
+      "elapsedSec": 30
+    }
+  ]
+}
