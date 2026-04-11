@@ -297,7 +297,9 @@ function resetStats() {
 
 startBtn.addEventListener("click", () => {
   if (isGifMode) {
-    startGifProcessing();
+    gifModalInfo.textContent = `${gifProcessor.frames.length} frames at ${gifProcessor.width}x${gifProcessor.height}. This will run the GA on each frame sequentially.`;
+    gifModal.classList.remove("hidden");
+    return;
   } else {
     spawnIslands();
     startBtn.disabled = true;
@@ -394,9 +396,7 @@ async function handleGif(file) {
     migViz.resize();
   });
 
-  // Show confirmation modal
-  gifModalInfo.textContent = `${info.frameCount} frames at ${info.width}x${info.height}. This will run the GA on each frame sequentially.`;
-  gifModal.classList.remove("hidden");
+  resetStats();
 }
 
 gifConfirmBtn.addEventListener("click", () => {
