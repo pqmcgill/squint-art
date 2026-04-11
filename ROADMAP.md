@@ -2,7 +2,7 @@
 
 ## Boilerplate / DX
 
-- [ ] CI pipeline (GitHub Actions: build + test on PR)
+- [x] CI pipeline (GitHub Actions: build + test on PR)
 - [ ] Pre-commit hook running `bun test`
 - [ ] `.nvmrc` or `package.json` engines field to pin Node/Bun versions
 - [ ] License file (MIT)
