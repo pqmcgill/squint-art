@@ -4,15 +4,15 @@ A genetic algorithm that evolves polygon-based art to approximate a reference im
 
 Named because the output looks surprisingly good if you squint.
 
-![Squint Art in action](screenshot.png)
+![Squint Art in action](img/screenshot.png)
 
-![Earth at 119K generations](screenshot-earth.png)
+![Earth at 119K generations](img/screenshot-earth.png)
 
-![Starry Night at 200K generations](screenshot-starry.png)
+![Starry Night at 200K generations](img/screenshot-starry.png)
 
 Oh, and it works on GIFs too.
 
-![GIF mode demo](squint-art-demo.gif)
+![GIF mode demo](img/squint-art-demo.gif)
 
 ## Quick Start
 
@@ -116,6 +116,7 @@ src/
     operators.js           Pure: polygon CRUD, crossover, mutation
     topology.js            Pure: ring/grid/star neighbors, migration selection
     fitness.js             Pure: pixel diff, similarity math
+    fitness.wat            Hand-written WebAssembly pixel diff (188 bytes)
     island-manager.js      Worker spawning + migration coordination
     worker.js              Web Worker entry point (bundled separately)
   gif/
@@ -128,10 +129,14 @@ src/
     renderer.js            Performance chart canvas renderer
     migration-viz.js       Island topology visualization
 
+  bench/
+    bench.js               Headless benchmark runner with worker_threads
+    bench-worker.js        Worker thread for island model benchmarks
+    ga-engine-node.js      Shared GA engine for Node.js benchmarks
+
 build.js                   Bun build script (two entry points: app + worker)
-fitness.wat/.wasm          Hand-written WebAssembly pixel diff (188 bytes)
-ga-engine-node.js          Shared GA engine for Node.js benchmarks
-bench.js / bench-worker.js Headless benchmark runner with worker_threads
+img/                       Screenshots, demo GIF, reference image
+test/                      Unit tests (bun test)
 ```
 
 Pure modules (`operators`, `topology`, `fitness`, `chart/data`) are independently unit-testable without DOM mocking.

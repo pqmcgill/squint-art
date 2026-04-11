@@ -25,7 +25,7 @@ fs.copyFileSync(
 // Compile fitness.wat → fitness.wasm
 const wabt = require("wabt");
 wabt().then((w) => {
-  const wat = fs.readFileSync(path.join(__dirname, "fitness.wat"), "utf8");
+  const wat = fs.readFileSync(path.join(__dirname, "src", "ga", "fitness.wat"), "utf8");
   const mod = w.parseWat("fitness.wat", wat);
   mod.validate();
   const { buffer } = mod.toBinary({});

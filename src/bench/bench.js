@@ -70,7 +70,7 @@ function selectSource(candidates, islandPolygons) {
 let wasmInstance = null;
 
 async function loadWasm() {
-  const buf = fs.readFileSync(path.join(__dirname, "fitness.wasm"));
+  const buf = fs.readFileSync(path.join(__dirname, "..", "..", "fitness.wasm"));
   const { instance } = await WebAssembly.instantiate(buf);
   wasmInstance = instance;
 }
@@ -193,7 +193,7 @@ function runIsland(img, entry) {
 async function main() {
   await loadWasm();
 
-  const imagePath = process.argv[2] || path.join(__dirname, "reference.jpg");
+  const imagePath = process.argv[2] || path.join(__dirname, "..", "..", "img", "reference.jpg");
   const img = await loadImage(imagePath);
 
   const total = MATRIX.length;
@@ -238,7 +238,7 @@ async function main() {
   console.log(sep);
 
   // Save JSON
-  const outDir = path.join(__dirname, "benchmark");
+  const outDir = path.join(__dirname, "..", "..", "benchmark");
   fs.mkdirSync(outDir, { recursive: true });
   const outFile = path.join(outDir, `island-${Date.now()}.json`);
   const report = {

@@ -6,7 +6,7 @@
     "dev": "node build.js && npx serve .",
     "start": "npx serve .",
     "test": "bun test",
-    "bench": "node bench.js"
+    "bench": "node src/bench/bench.js"
   },
   "dependencies": {
     "@napi-rs/canvas": "^0.1.65",
