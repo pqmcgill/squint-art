@@ -47,8 +47,12 @@ class MigrationViz {
   }
 
   resize() {
-    this.canvas.width = 220;
-    this.canvas.height = 220;
+    const parent = this.canvas.parentElement;
+    if (!parent) return;
+    const w = parent.clientWidth;
+    if (w === 0) return;
+    this.canvas.width = w;
+    this.canvas.height = 180;
     this.draw();
   }
 

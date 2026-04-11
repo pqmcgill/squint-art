@@ -350,4 +350,7 @@ document.getElementById("clear-chart-btn").addEventListener("click", () => {
   benchmark.clearRuns();
 });
 
-window.addEventListener("resize", () => benchmark.resize());
+window.addEventListener("resize", () => {
+  benchmark.resize();
+  migViz.resize();
+});
