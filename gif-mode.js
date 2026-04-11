@@ -6,22 +6,39 @@ class GifPlayer {
   constructor(canvas) {
     this.canvas = canvas;
     this.ctx = canvas.getContext("2d");
-    this.frames = [];  // { source (canvas or ImageData), delay }
+    this._rendered = []; // pre-rendered { canvas, delay }
     this.index = 0;
     this._timer = null;
   }
 
-  setFrames(frames, width, height) {
+  // Accept frames as { source (ImageData or Canvas), delay }
+  // Pre-renders everything to canvas elements at display size for fast playback.
+  setFrames(frames, displayW, displayH) {
     this.stop();
-    this.frames = frames;
-    this.canvas.width = width;
-    this.canvas.height = height;
+    this.canvas.width = displayW;
+    this.canvas.height = displayH;
+    this._rendered = frames.map((f) => {
+      const c = document.createElement("canvas");
+      c.width = displayW;
+      c.height = displayH;
+      const cctx = c.getContext("2d");
+      if (f.source instanceof ImageData) {
+        const tmp = document.createElement("canvas");
+        tmp.width = f.source.width;
+        tmp.height = f.source.height;
+        tmp.getContext("2d").putImageData(f.source, 0, 0);
+        cctx.drawImage(tmp, 0, 0, displayW, displayH);
+      } else {
+        cctx.drawImage(f.source, 0, 0, displayW, displayH);
+      }
+      return { canvas: c, delay: f.delay };
+    });
     this.index = 0;
-    if (frames.length > 0) this._drawFrame(0);
+    if (this._rendered.length > 0) this._drawFrame(0);
   }
 
   play() {
-    if (this.frames.length < 2) return;
+    if (this._rendered.length < 2) return;
     this.stop();
     this._scheduleNext();
   }
@@ -34,27 +51,16 @@ class GifPlayer {
   }
 
   _drawFrame(i) {
-    const frame = this.frames[i];
+    const frame = this._rendered[i];
     if (!frame) return;
-    const { canvas, ctx } = this;
-    if (frame.source instanceof ImageData) {
-      // Scale ImageData to canvas size via temp canvas
-      const tmp = document.createElement("canvas");
-      tmp.width = frame.source.width;
-      tmp.height = frame.source.height;
-      tmp.getContext("2d").putImageData(frame.source, 0, 0);
-      ctx.drawImage(tmp, 0, 0, canvas.width, canvas.height);
-    } else {
-      // Canvas element — draw directly
-      ctx.drawImage(frame.source, 0, 0, canvas.width, canvas.height);
-    }
+    this.ctx.drawImage(frame.canvas, 0, 0);
   }
 
   _scheduleNext() {
-    const frame = this.frames[this.index];
+    const frame = this._rendered[this.index];
     if (!frame) return;
     this._timer = setTimeout(() => {
-      this.index = (this.index + 1) % this.frames.length;
+      this.index = (this.index + 1) % this._rendered.length;
       this._drawFrame(this.index);
       this._scheduleNext();
     }, frame.delay);
@@ -118,8 +124,9 @@ class GifProcessor {
       // Capture the full composited frame
       const fullFrame = compCtx.getImageData(0, 0, w, h);
       // gifuct delay is centiseconds; gif.js expects milliseconds
-      // Browsers treat delay=0 as ~100ms; floor to 20ms like browsers do
-      const delayMs = Math.max(20, (frame.delay || 10) * 10);
+      // Chrome treats delay <= 1cs as 100ms; otherwise use actual value
+      const rawDelay = frame.delay;
+      const delayMs = (rawDelay <= 1) ? 100 : rawDelay * 10;
       this.frames.push({
         imageData: fullFrame,
         delay: delayMs,
