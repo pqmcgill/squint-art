@@ -2,6 +2,8 @@
   "name": "polygon-ga",
   "private": true,
   "scripts": {
+    "build": "node build.js",
+    "dev": "node build.js && npx serve .",
     "start": "npx serve .",
     "bench": "node bench.js"
   },

@@ -1,27 +1,20 @@
-// Benchmark — lightweight performance data collection and canvas chart renderer.
-// Piggybacks on existing worker updates so it adds no extra computation to the GA.
+// Chart canvas renderer — draws benchmark data onto a canvas.
 
-class Benchmark {
-  static COLORS = [
-    "#7c6aef", "#ef6a7c", "#6aef7c", "#efcf6a",
-    "#6acfef", "#cf6aef", "#ef9a6a", "#6a9aef",
-  ];
+const COLORS = [
+  "#7c6aef", "#ef6a7c", "#6aef7c", "#efcf6a",
+  "#6acfef", "#cf6aef", "#ef9a6a", "#6a9aef",
+];
 
-  constructor(canvas) {
+export class ChartRenderer {
+  constructor(canvas, data) {
     this.canvas = canvas;
     this.ctx = canvas.getContext("2d");
-    this.runs = [];
-    this.activeRun = null;
-    this.xAxis = "generation"; // "generation" | "time"
+    this.data = data; // BenchmarkData instance
+    this.xAxis = "generation";
     this._lastDraw = 0;
     this._throttle = 300;
     this._pending = false;
-
-    this.resize();
-    this.draw();
   }
-
-  // ---- Public API ----
 
   resize() {
     const parent = this.canvas.parentElement;
@@ -33,58 +26,29 @@ class Benchmark {
     this.draw();
   }
 
-  startRun(config) {
-    this.activeRun = {
-      label: "Run " + (this.runs.length + 1),
-      config: { ...config },
-      t0: performance.now(),
-      points: [],
-    };
-    this.runs.push(this.activeRun);
-  }
-
-  record(generation, similarity) {
-    if (!this.activeRun) return;
-    this.activeRun.points.push({
-      gen: generation,
-      similarity,
-      time: (performance.now() - this.activeRun.t0) / 1000,
-    });
-    this._scheduleDraw();
-  }
-
-  stopRun() {
-    this.activeRun = null;
-  }
-
   setXAxis(axis) {
     this.xAxis = axis;
     this.draw();
   }
 
-  clearRuns() {
-    this.runs = [];
-    this.activeRun = null;
-    this.draw();
+  scheduleDraw() {
+    if (this._pending) return;
+    const gap = performance.now() - this._lastDraw;
+    if (gap >= this._throttle) {
+      this.draw();
+    } else {
+      this._pending = true;
+      setTimeout(() => {
+        this._pending = false;
+        this.draw();
+      }, this._throttle - gap);
+    }
   }
-
-  exportData() {
-    return JSON.stringify(
-      this.runs.map((r) => ({
-        label: r.label,
-        config: r.config,
-        points: r.points,
-      })),
-      null,
-      2,
-    );
-  }
-
-  // ---- Drawing ----
 
   draw() {
     this._lastDraw = performance.now();
-    const { canvas, ctx, runs, xAxis } = this;
+    const { canvas, ctx, xAxis } = this;
+    const runs = this.data.runs;
     const W = canvas.width;
     const H = canvas.height;
     if (W === 0 || H === 0) return;
@@ -93,11 +57,9 @@ class Benchmark {
     const pw = W - pad.left - pad.right;
     const ph = H - pad.top - pad.bottom;
 
-    // Background
     ctx.fillStyle = "#141416";
     ctx.fillRect(0, 0, W, H);
 
-    // Plot border
     ctx.strokeStyle = "#2a2a2e";
     ctx.lineWidth = 1;
     ctx.strokeRect(pad.left, pad.top, pw, ph);
@@ -112,9 +74,8 @@ class Benchmark {
     }
     if (xMax === 0) xMax = xAxis === "generation" ? 100 : 10;
 
-    // Auto-scale Y to actual data range
-    let yMin = Infinity;
-    let yMax = -Infinity;
+    // Auto-scale Y
+    let yMin = Infinity, yMax = -Infinity;
     for (const run of runs) {
       for (const p of run.points) {
         if (p.similarity < yMin) yMin = p.similarity;
@@ -123,7 +84,6 @@ class Benchmark {
     }
     if (!isFinite(yMin)) { yMin = 0; yMax = 100; }
 
-    // Pad and snap to nice tick boundaries
     const yRange = yMax - yMin || 1;
     const yStep = this._niceStep(yRange, 6);
     yMin = Math.max(0, Math.floor(yMin / yStep) * yStep);
@@ -137,7 +97,6 @@ class Benchmark {
     ctx.lineWidth = 0.5;
     ctx.font = "10px -apple-system, sans-serif";
 
-    // Horizontal grid
     ctx.textBaseline = "middle";
     ctx.textAlign = "right";
     for (let y = yMin; y <= yMax; y += yStep) {
@@ -150,7 +109,6 @@ class Benchmark {
       ctx.fillText(y.toFixed(yStep < 1 ? 1 : 0) + "%", pad.left - 6, py);
     }
 
-    // Vertical grid
     const xStep = this._niceStep(xMax, 8);
     ctx.textBaseline = "top";
     ctx.textAlign = "center";
@@ -163,8 +121,7 @@ class Benchmark {
       ctx.fillStyle = "#555";
       ctx.fillText(
         xAxis === "generation" ? this._fmtNum(x) : x.toFixed(1) + "s",
-        px,
-        pad.top + ph + 6,
+        px, pad.top + ph + 6,
       );
     }
     ctx.setLineDash([]);
@@ -174,11 +131,7 @@ class Benchmark {
     ctx.font = "11px -apple-system, sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "top";
-    ctx.fillText(
-      xAxis === "generation" ? "Generation" : "Time (s)",
-      pad.left + pw / 2,
-      H - 4,
-    );
+    ctx.fillText(xAxis === "generation" ? "Generation" : "Time (s)", pad.left + pw / 2, H - 4);
 
     ctx.save();
     ctx.translate(12, pad.top + ph / 2);
@@ -191,8 +144,7 @@ class Benchmark {
     for (let r = 0; r < runs.length; r++) {
       const run = runs[r];
       if (run.points.length < 2) continue;
-      const color = Benchmark.COLORS[r % Benchmark.COLORS.length];
-      ctx.strokeStyle = color;
+      ctx.strokeStyle = COLORS[r % COLORS.length];
       ctx.lineWidth = 1.5;
       ctx.beginPath();
       for (let i = 0; i < run.points.length; i++) {
@@ -216,10 +168,9 @@ class Benchmark {
 
       for (let r = 0; r < runs.length; r++) {
         const run = runs[r];
-        const color = Benchmark.COLORS[r % Benchmark.COLORS.length];
+        const color = COLORS[r % COLORS.length];
         const pts = run.points;
-        const lastSim =
-          pts.length > 0 ? pts[pts.length - 1].similarity.toFixed(1) + "%" : "-";
+        const lastSim = pts.length > 0 ? pts[pts.length - 1].similarity.toFixed(1) + "%" : "-";
 
         ctx.strokeStyle = color;
         ctx.lineWidth = 2;
@@ -242,22 +193,6 @@ class Benchmark {
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText("Run the GA to see performance data", W / 2, H / 2);
-    }
-  }
-
-  // ---- Internals ----
-
-  _scheduleDraw() {
-    if (this._pending) return;
-    const gap = performance.now() - this._lastDraw;
-    if (gap >= this._throttle) {
-      this.draw();
-    } else {
-      this._pending = true;
-      setTimeout(() => {
-        this._pending = false;
-        this.draw();
-      }, this._throttle - gap);
     }
   }
 

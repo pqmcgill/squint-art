@@ -1,49 +1,16 @@
-// Migration topology visualization — shows islands as nodes, migration events as animated arcs.
+// Migration topology visualization — island nodes with animated migration arcs.
 
-class MigrationViz {
-  // Topology definitions: return array of neighbor indices for island i out of n total
-  static TOPOLOGIES = {
-    ring: {
-      label: "Ring",
-      neighbors(i, n) {
-        return [(i - 1 + n) % n, (i + 1) % n];
-      },
-    },
-    grid: {
-      label: "Grid",
-      neighbors(i, n) {
-        const cols = Math.ceil(Math.sqrt(n));
-        const row = Math.floor(i / cols);
-        const col = i % cols;
-        const out = [];
-        if (row > 0) out.push((row - 1) * cols + col);
-        const nextRow = row + 1;
-        if (nextRow * cols - (cols - 1 - col) <= n && nextRow * cols + col < n)
-          out.push(nextRow * cols + col);
-        if (col > 0) out.push(row * cols + col - 1);
-        if (col + 1 < cols && row * cols + col + 1 < n) out.push(row * cols + col + 1);
-        return out;
-      },
-    },
-    star: {
-      label: "Star",
-      neighbors(i, n) {
-        const out = [];
-        for (let j = 0; j < n; j++) if (j !== i) out.push(j);
-        return out;
-      },
-    },
-  };
+import { TOPOLOGIES } from "../ga/topology.js";
 
+export class MigrationViz {
   constructor(canvas) {
     this.canvas = canvas;
     this.ctx = canvas.getContext("2d");
     this.topology = "ring";
     this.numIslands = 0;
     this.islandSimilarity = [];
-    this.migrations = []; // { from, to, time }
+    this.migrations = [];
     this._animating = false;
-    this.resize();
   }
 
   resize() {
@@ -51,7 +18,6 @@ class MigrationViz {
     if (!parent) return;
     const w = parent.clientWidth;
     if (w === 0) return;
-    // Square canvas that fits within the container
     const size = Math.min(w, 240);
     this.canvas.width = size;
     this.canvas.height = size;
@@ -68,7 +34,6 @@ class MigrationViz {
 
   updateIsland(index, similarity) {
     this.islandSimilarity[index] = similarity;
-    // Don't redraw every update — draw() is called from the animation loop or main update
   }
 
   addMigration(from, to) {
@@ -77,7 +42,7 @@ class MigrationViz {
   }
 
   getNeighbors(i) {
-    const topo = MigrationViz.TOPOLOGIES[this.topology];
+    const topo = TOPOLOGIES[this.topology];
     return topo ? topo.neighbors(i, this.numIslands) : [];
   }
 
@@ -105,7 +70,6 @@ class MigrationViz {
       }));
     }
 
-    // Ring and star: circular layout
     const r = Math.min(cx, cy) - 32;
     return Array.from({ length: n }, (_, i) => ({
       x: cx + r * Math.cos((i / n) * Math.PI * 2 - Math.PI / 2),
@@ -119,7 +83,6 @@ class MigrationViz {
     const h = canvas.height;
     const now = performance.now();
 
-    // Prune old migrations
     this.migrations = this.migrations.filter((m) => now - m.time < 2000);
 
     ctx.fillStyle = "#141416";
@@ -135,10 +98,10 @@ class MigrationViz {
     }
 
     const pos = this._nodePositions();
-    const topo = MigrationViz.TOPOLOGIES[this.topology];
+    const topo = TOPOLOGIES[this.topology];
     const nodeR = this.numIslands > 12 ? 7 : 10;
 
-    // Draw topology edges
+    // Topology edges
     ctx.strokeStyle = "#1e1e22";
     ctx.lineWidth = 1;
     const drawn = new Set();
@@ -154,7 +117,7 @@ class MigrationViz {
       }
     }
 
-    // Draw migration arcs
+    // Migration arcs
     for (const m of this.migrations) {
       const age = now - m.time;
       const alpha = Math.max(0, 1 - age / 2000);
@@ -165,14 +128,10 @@ class MigrationViz {
       const dx = to.x - from.x;
       const dy = to.y - from.y;
       const angle = Math.atan2(dy, dx);
-      const dist = Math.sqrt(dx * dx + dy * dy);
-
-      // Animated dot traveling along the arc
       const t = Math.min(1, age / 800);
       const dotX = from.x + dx * t;
       const dotY = from.y + dy * t;
 
-      // Trail line
       ctx.strokeStyle = `rgba(124, 106, 239, ${alpha * 0.4})`;
       ctx.lineWidth = 2;
       ctx.beginPath();
@@ -180,7 +139,6 @@ class MigrationViz {
       ctx.lineTo(dotX, dotY);
       ctx.stroke();
 
-      // Traveling dot
       if (t < 1) {
         ctx.fillStyle = `rgba(124, 106, 239, ${alpha})`;
         ctx.beginPath();
@@ -188,7 +146,6 @@ class MigrationViz {
         ctx.fill();
       }
 
-      // Flash on receiving node
       if (t >= 1) {
         const flash = Math.max(0, 1 - (age - 800) / 1200);
         ctx.strokeStyle = `rgba(124, 106, 239, ${flash * 0.6})`;
@@ -199,15 +156,13 @@ class MigrationViz {
       }
     }
 
-    // Draw nodes
+    // Nodes
     for (let i = 0; i < this.numIslands; i++) {
       const { x, y } = pos[i];
       const sim = this.islandSimilarity[i];
 
-      // Color by similarity — map range to green intensity
       let color = "#2a2a2e";
       if (sim !== null) {
-        // Find min/max among islands for relative coloring
         const sims = this.islandSimilarity.filter((s) => s !== null);
         const lo = Math.min(...sims);
         const hi = Math.max(...sims);
@@ -227,14 +182,12 @@ class MigrationViz {
       ctx.lineWidth = 1;
       ctx.stroke();
 
-      // Island number
       ctx.fillStyle = "#ddd";
       ctx.font = `${nodeR > 7 ? 9 : 7}px -apple-system, sans-serif`;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText(String(i), x, y);
 
-      // Similarity label
       if (sim !== null && nodeR > 7) {
         ctx.fillStyle = "#666";
         ctx.font = "8px -apple-system, sans-serif";
@@ -243,19 +196,16 @@ class MigrationViz {
       }
     }
 
-    // Topology label
+    // Label
     ctx.fillStyle = "#444";
     ctx.font = "10px -apple-system, sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "bottom";
     ctx.fillText(
       topo.label + " \u00b7 " + this.numIslands + " islands",
-      w / 2,
-      h - 4,
+      w / 2, h - 4,
     );
   }
-
-  // ---- Animation ----
 
   _startAnimation() {
     if (this._animating) return;
