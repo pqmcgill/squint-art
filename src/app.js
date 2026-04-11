@@ -375,3 +375,17 @@ document.getElementById("clear-chart-btn").addEventListener("click", () => {
 });
 
 window.addEventListener("resize", () => { chart.resize(); migViz.resize(); });
+
+// ---- Battery saver: pause workers when tab is hidden ----
+
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    if (islands.numIslands > 0 && !islands.paused) {
+      islands.pause();
+    }
+  } else {
+    if (islands.paused) {
+      islands.resume(getTopology());
+    }
+  }
+});

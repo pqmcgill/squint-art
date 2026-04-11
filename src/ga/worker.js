@@ -92,6 +92,12 @@ self.onmessage = async function (e) {
   } else if (type === "stop") {
     running = false;
 
+  } else if (type === "resume") {
+    if (!running && population.length > 0) {
+      running = true;
+      runGA();
+    }
+
   } else if (type === "migrate") {
     if (population.length > 0 && data.polygons) {
       let worstIdx = 0;

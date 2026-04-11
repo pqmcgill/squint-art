@@ -60,11 +60,32 @@ export class IslandManager {
     }, 5000);
   }
 
+  pause() {
+    if (this._migrationTimer) {
+      clearInterval(this._migrationTimer);
+      this._migrationTimer = null;
+    }
+    for (const w of this.workers) w.postMessage({ type: "stop" });
+    this._paused = true;
+  }
+
+  resume(topology) {
+    if (!this._paused || this.workers.length === 0) return;
+    for (const w of this.workers) w.postMessage({ type: "resume" });
+    this._migrationTimer = setInterval(() => this._migrate(topology), 5000);
+    this._paused = false;
+  }
+
+  get paused() {
+    return !!this._paused;
+  }
+
   kill() {
     if (this._migrationTimer) {
       clearInterval(this._migrationTimer);
       this._migrationTimer = null;
     }
+    this._paused = false;
     for (const w of this.workers) w.terminate();
     this.workers = [];
   }
