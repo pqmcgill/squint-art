@@ -1,5 +1,8 @@
 # Squint Art
 
+[![CI](https://github.com/pqmcgill/squint-art/actions/workflows/ci.yml/badge.svg)](https://github.com/pqmcgill/squint-art/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 A genetic algorithm that evolves polygon-based art to approximate a reference image, producing an abstract, impressionistic recreation. Drop in any image and watch as semi-transparent polygons are bred, mutated, and selected over thousands of generations to converge on it.
 
 Named because the output looks surprisingly good if you squint.

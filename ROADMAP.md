@@ -4,8 +4,8 @@
 
 - [x] CI pipeline (GitHub Actions: build + test on PR)
 - [ ] Pre-commit hook running `bun test`
-- [ ] `.nvmrc` or `package.json` engines field to pin Node/Bun versions
-- [ ] License file (MIT)
+- [x] `.nvmrc` or `package.json` engines field to pin Node/Bun versions
+- [x] License file (MIT)
 - [x] Contributing guide
 
 ## Documentation
