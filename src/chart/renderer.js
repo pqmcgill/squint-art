@@ -1,8 +1,14 @@
 // Chart canvas renderer — draws benchmark data onto a canvas.
 
 const COLORS = [
-  "#7c6aef", "#ef6a7c", "#6aef7c", "#efcf6a",
-  "#6acfef", "#cf6aef", "#ef9a6a", "#6a9aef",
+  "#7c6aef",
+  "#ef6a7c",
+  "#6aef7c",
+  "#efcf6a",
+  "#6acfef",
+  "#cf6aef",
+  "#ef9a6a",
+  "#6a9aef",
 ];
 
 export class ChartRenderer {
@@ -75,14 +81,18 @@ export class ChartRenderer {
     if (xMax === 0) xMax = xAxis === "generation" ? 100 : 10;
 
     // Auto-scale Y
-    let yMin = Infinity, yMax = -Infinity;
+    let yMin = Infinity,
+      yMax = -Infinity;
     for (const run of runs) {
       for (const p of run.points) {
         if (p.similarity < yMin) yMin = p.similarity;
         if (p.similarity > yMax) yMax = p.similarity;
       }
     }
-    if (!isFinite(yMin)) { yMin = 0; yMax = 100; }
+    if (!Number.isFinite(yMin)) {
+      yMin = 0;
+      yMax = 100;
+    }
 
     const yRange = yMax - yMin || 1;
     const yStep = this._niceStep(yRange, 6);
@@ -106,7 +116,7 @@ export class ChartRenderer {
       ctx.lineTo(pad.left + pw, py);
       ctx.stroke();
       ctx.fillStyle = "#555";
-      ctx.fillText(y.toFixed(yStep < 1 ? 1 : 0) + "%", pad.left - 6, py);
+      ctx.fillText(`${y.toFixed(yStep < 1 ? 1 : 0)}%`, pad.left - 6, py);
     }
 
     const xStep = this._niceStep(xMax, 8);
@@ -120,8 +130,9 @@ export class ChartRenderer {
       ctx.stroke();
       ctx.fillStyle = "#555";
       ctx.fillText(
-        xAxis === "generation" ? this._fmtNum(x) : x.toFixed(1) + "s",
-        px, pad.top + ph + 6,
+        xAxis === "generation" ? this._fmtNum(x) : `${x.toFixed(1)}s`,
+        px,
+        pad.top + ph + 6,
       );
     }
     ctx.setLineDash([]);
@@ -131,7 +142,11 @@ export class ChartRenderer {
     ctx.font = "11px -apple-system, sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "top";
-    ctx.fillText(xAxis === "generation" ? "Generation" : "Time (s)", pad.left + pw / 2, H - 4);
+    ctx.fillText(
+      xAxis === "generation" ? "Generation" : "Time (s)",
+      pad.left + pw / 2,
+      H - 4,
+    );
 
     ctx.save();
     ctx.translate(12, pad.top + ph / 2);
@@ -170,7 +185,10 @@ export class ChartRenderer {
         const run = runs[r];
         const color = COLORS[r % COLORS.length];
         const pts = run.points;
-        const lastSim = pts.length > 0 ? pts[pts.length - 1].similarity.toFixed(1) + "%" : "-";
+        const lastSim =
+          pts.length > 0
+            ? `${pts[pts.length - 1].similarity.toFixed(1)}%`
+            : "-";
 
         ctx.strokeStyle = color;
         ctx.lineWidth = 2;
@@ -199,15 +217,15 @@ export class ChartRenderer {
   _niceStep(range, ticks) {
     if (range <= 0) return 1;
     const rough = range / ticks;
-    const mag = Math.pow(10, Math.floor(Math.log10(rough)));
+    const mag = 10 ** Math.floor(Math.log10(rough));
     const r = rough / mag;
     const nice = r <= 1.5 ? 1 : r <= 3 ? 2 : r <= 7 ? 5 : 10;
     return Math.max(1, nice * mag);
   }
 
   _fmtNum(n) {
-    if (n >= 1e6) return (n / 1e6).toFixed(1) + "M";
-    if (n >= 1e3) return (n / 1e3).toFixed(1) + "K";
+    if (n >= 1e6) return `${(n / 1e6).toFixed(1)}M`;
+    if (n >= 1e3) return `${(n / 1e3).toFixed(1)}K`;
     return String(Math.round(n));
   }
 }

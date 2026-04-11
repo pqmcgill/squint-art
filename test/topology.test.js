@@ -1,5 +1,5 @@
-import { describe, test, expect } from "bun:test";
-import { TOPOLOGIES, selectSource } from "../src/ga/topology.js";
+import { describe, expect, test } from "bun:test";
+import { selectSource, TOPOLOGIES } from "../src/ga/topology.js";
 
 describe("ring topology", () => {
   const ring = TOPOLOGIES.ring;
@@ -88,11 +88,7 @@ describe("selectSource", () => {
   });
 
   test("returns the only valid candidate", () => {
-    const state = [
-      null,
-      { similarity: 95, polygons: [] },
-      null,
-    ];
+    const state = [null, { similarity: 95, polygons: [] }, null];
     expect(selectSource([0, 1, 2], state)).toBe(1);
   });
 

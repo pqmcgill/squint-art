@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeEach } from "bun:test";
+import { beforeEach, describe, expect, test } from "bun:test";
 import { IslandManager } from "../src/ga/island-manager.js";
 
 // We can't spawn real Web Workers in bun test, but we can test
@@ -34,9 +34,7 @@ describe("IslandManager state", () => {
   });
 
   test("resume clears paused flag", () => {
-    mgr.workers = [
-      { postMessage() {}, terminate() {} },
-    ];
+    mgr.workers = [{ postMessage() {}, terminate() {} }];
     mgr._paused = true;
     mgr.resume("ring");
     expect(mgr.paused).toBe(false);
@@ -59,8 +57,18 @@ describe("IslandManager state", () => {
   test("pause sends stop to all workers", () => {
     const messages = [];
     mgr.workers = [
-      { postMessage(m) { messages.push(m); }, terminate() {} },
-      { postMessage(m) { messages.push(m); }, terminate() {} },
+      {
+        postMessage(m) {
+          messages.push(m);
+        },
+        terminate() {},
+      },
+      {
+        postMessage(m) {
+          messages.push(m);
+        },
+        terminate() {},
+      },
     ];
     mgr.pause();
     expect(messages).toEqual([{ type: "stop" }, { type: "stop" }]);
@@ -69,7 +77,12 @@ describe("IslandManager state", () => {
   test("resume sends resume to all workers", () => {
     const messages = [];
     mgr.workers = [
-      { postMessage(m) { messages.push(m); }, terminate() {} },
+      {
+        postMessage(m) {
+          messages.push(m);
+        },
+        terminate() {},
+      },
     ];
     mgr._paused = true;
     mgr.resume("ring");
@@ -77,11 +90,7 @@ describe("IslandManager state", () => {
   });
 
   test("totalGenerations sums across island states", () => {
-    mgr.islandState = [
-      { generation: 100 },
-      null,
-      { generation: 200 },
-    ];
+    mgr.islandState = [{ generation: 100 }, null, { generation: 200 }];
     expect(mgr.totalGenerations()).toBe(300);
   });
 });

@@ -59,7 +59,8 @@ export class MigrationViz {
     if (this.topology === "grid") {
       const cols = Math.ceil(Math.sqrt(n));
       const rows = Math.ceil(n / cols);
-      const padX = 35, padY = 30;
+      const padX = 35,
+        padY = 30;
       const cellW = cols > 1 ? (w - padX * 2) / (cols - 1) : 0;
       const cellH = rows > 1 ? (h - padY * 2 - 15) / (rows - 1) : 0;
       const offX = cols === 1 ? cx : padX;
@@ -107,7 +108,7 @@ export class MigrationViz {
     const drawn = new Set();
     for (let i = 0; i < this.numIslands; i++) {
       for (const j of topo.neighbors(i, this.numIslands)) {
-        const key = Math.min(i, j) + ":" + Math.max(i, j);
+        const key = `${Math.min(i, j)}:${Math.max(i, j)}`;
         if (drawn.has(key)) continue;
         drawn.add(key);
         ctx.beginPath();
@@ -135,7 +136,10 @@ export class MigrationViz {
       ctx.strokeStyle = `rgba(124, 106, 239, ${alpha * 0.4})`;
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.moveTo(from.x + Math.cos(angle) * nodeR, from.y + Math.sin(angle) * nodeR);
+      ctx.moveTo(
+        from.x + Math.cos(angle) * nodeR,
+        from.y + Math.sin(angle) * nodeR,
+      );
       ctx.lineTo(dotX, dotY);
       ctx.stroke();
 
@@ -192,7 +196,7 @@ export class MigrationViz {
         ctx.fillStyle = "#666";
         ctx.font = "8px -apple-system, sans-serif";
         ctx.textBaseline = "bottom";
-        ctx.fillText(sim.toFixed(1) + "%", x, y - nodeR - 3);
+        ctx.fillText(`${sim.toFixed(1)}%`, x, y - nodeR - 3);
       }
     }
 
@@ -202,8 +206,9 @@ export class MigrationViz {
     ctx.textAlign = "center";
     ctx.textBaseline = "bottom";
     ctx.fillText(
-      topo.label + " \u00b7 " + this.numIslands + " islands",
-      w / 2, h - 4,
+      `${topo.label} \u00b7 ${this.numIslands} islands`,
+      w / 2,
+      h - 4,
     );
   }
 

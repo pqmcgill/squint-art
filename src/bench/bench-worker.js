@@ -1,9 +1,13 @@
 // Island worker thread for bench.js — runs GA in its own thread.
 // Supports periodic state reporting and migration via receiveMessageOnPort.
 
-const { parentPort, workerData, receiveMessageOnPort } = require("worker_threads");
+const {
+  parentPort,
+  workerData,
+  receiveMessageOnPort,
+} = require("node:worker_threads");
 const { createCanvas } = require("@napi-rs/canvas");
-const fs = require("fs");
+const fs = require("node:fs");
 const { GA } = require("./ga-engine-node.js");
 
 (async () => {
@@ -12,7 +16,14 @@ const { GA } = require("./ga-engine-node.js");
   const wasmBuf = fs.readFileSync(wasmPath);
   const { instance } = await WebAssembly.instantiate(wasmBuf);
 
-  const ga = new GA(new Uint8ClampedArray(refData), w, h, cfg, createCanvas, instance);
+  const ga = new GA(
+    new Uint8ClampedArray(refData),
+    w,
+    h,
+    cfg,
+    createCanvas,
+    instance,
+  );
 
   // Warmup
   const warmEnd = performance.now() + warmup;
@@ -27,8 +38,11 @@ const { GA } = require("./ga-engine-node.js");
     ga.step();
 
     // Non-blocking check for migration messages
-    let msg;
-    while ((msg = receiveMessageOnPort(parentPort))) {
+    for (
+      let msg = receiveMessageOnPort(parentPort);
+      msg;
+      msg = receiveMessageOnPort(parentPort)
+    ) {
       if (msg.message.type === "migrate" && msg.message.polygons) {
         ga.migrate(msg.message.polygons);
       }

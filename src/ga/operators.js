@@ -6,7 +6,8 @@ export function clamp(v, lo, hi) {
 }
 
 export function gaussianRandom() {
-  let u = 0, v = 0;
+  let u = 0,
+    v = 0;
   while (u === 0) u = Math.random();
   while (v === 0) v = Math.random();
   return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
@@ -45,7 +46,10 @@ export function createRandomPolygon(numVertices) {
 export function clonePolygon(p) {
   return {
     points: p.points.map((pt) => ({ x: pt.x, y: pt.y })),
-    r: p.r, g: p.g, b: p.b, a: p.a,
+    r: p.r,
+    g: p.g,
+    b: p.b,
+    a: p.a,
     fill: p.fill,
   };
 }
@@ -90,15 +94,30 @@ export function mutate(individual, mutationRate, numVertices) {
     }
 
     let colorChanged = false;
-    if (Math.random() < mr) { poly.r = clamp(poly.r + Math.floor(gaussianRandom() * 20), 0, 255); colorChanged = true; }
-    if (Math.random() < mr) { poly.g = clamp(poly.g + Math.floor(gaussianRandom() * 20), 0, 255); colorChanged = true; }
-    if (Math.random() < mr) { poly.b = clamp(poly.b + Math.floor(gaussianRandom() * 20), 0, 255); colorChanged = true; }
-    if (Math.random() < mr) { poly.a = clamp(poly.a + gaussianRandom() * 0.05, 0.01, 1); colorChanged = true; }
+    if (Math.random() < mr) {
+      poly.r = clamp(poly.r + Math.floor(gaussianRandom() * 20), 0, 255);
+      colorChanged = true;
+    }
+    if (Math.random() < mr) {
+      poly.g = clamp(poly.g + Math.floor(gaussianRandom() * 20), 0, 255);
+      colorChanged = true;
+    }
+    if (Math.random() < mr) {
+      poly.b = clamp(poly.b + Math.floor(gaussianRandom() * 20), 0, 255);
+      colorChanged = true;
+    }
+    if (Math.random() < mr) {
+      poly.a = clamp(poly.a + gaussianRandom() * 0.05, 0.01, 1);
+      colorChanged = true;
+    }
     if (colorChanged) polyFill(poly);
 
     if (Math.random() < mr * 0.5) {
       const j = Math.floor(Math.random() * individual.polygons.length);
-      [individual.polygons[i], individual.polygons[j]] = [individual.polygons[j], individual.polygons[i]];
+      [individual.polygons[i], individual.polygons[j]] = [
+        individual.polygons[j],
+        individual.polygons[i],
+      ];
     }
   }
 }

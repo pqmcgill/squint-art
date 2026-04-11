@@ -1,4 +1,4 @@
-import { describe, test, expect } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import { BenchmarkData } from "../src/chart/data.js";
 
 describe("BenchmarkData", () => {

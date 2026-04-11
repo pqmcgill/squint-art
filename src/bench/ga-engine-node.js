@@ -6,7 +6,8 @@ function clamp(v, lo, hi) {
 }
 
 function gaussianRandom() {
-  let u = 0, v = 0;
+  let u = 0,
+    v = 0;
   while (u === 0) u = Math.random();
   while (v === 0) v = Math.random();
   return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
@@ -39,7 +40,12 @@ class GA {
     tmpImg.data.set(refData);
     tmpCtx.putImageData(tmpImg, 0, 0);
     this.fitCtx.drawImage(tmpCanvas, 0, 0, this.fitW, this.fitH);
-    const fitRefData = this.fitCtx.getImageData(0, 0, this.fitW, this.fitH).data;
+    const fitRefData = this.fitCtx.getImageData(
+      0,
+      0,
+      this.fitW,
+      this.fitH,
+    ).data;
 
     // Wasm memory
     const mem = wasmInstance.exports.memory;
@@ -90,7 +96,10 @@ class GA {
   _clonePoly(p) {
     return {
       points: p.points.map((pt) => ({ x: pt.x, y: pt.y })),
-      r: p.r, g: p.g, b: p.b, a: p.a,
+      r: p.r,
+      g: p.g,
+      b: p.b,
+      a: p.a,
       fill: p.fill,
     };
   }
@@ -101,7 +110,8 @@ class GA {
 
   _createIndividual() {
     const polys = [];
-    for (let i = 0; i < this.cfg.numPolygons; i++) polys.push(this._randomPolygon());
+    for (let i = 0; i < this.cfg.numPolygons; i++)
+      polys.push(this._randomPolygon());
     return { polygons: polys };
   }
 
@@ -183,10 +193,22 @@ class GA {
         }
       }
       let cc = false;
-      if (Math.random() < mr) { poly.r = clamp(poly.r + Math.floor(gaussianRandom() * 20), 0, 255); cc = true; }
-      if (Math.random() < mr) { poly.g = clamp(poly.g + Math.floor(gaussianRandom() * 20), 0, 255); cc = true; }
-      if (Math.random() < mr) { poly.b = clamp(poly.b + Math.floor(gaussianRandom() * 20), 0, 255); cc = true; }
-      if (Math.random() < mr) { poly.a = clamp(poly.a + gaussianRandom() * 0.05, 0.01, 1); cc = true; }
+      if (Math.random() < mr) {
+        poly.r = clamp(poly.r + Math.floor(gaussianRandom() * 20), 0, 255);
+        cc = true;
+      }
+      if (Math.random() < mr) {
+        poly.g = clamp(poly.g + Math.floor(gaussianRandom() * 20), 0, 255);
+        cc = true;
+      }
+      if (Math.random() < mr) {
+        poly.b = clamp(poly.b + Math.floor(gaussianRandom() * 20), 0, 255);
+        cc = true;
+      }
+      if (Math.random() < mr) {
+        poly.a = clamp(poly.a + gaussianRandom() * 0.05, 0.01, 1);
+        cc = true;
+      }
       if (cc) GA._polyFill(poly);
       if (Math.random() < mr * 0.5) {
         const j = Math.floor(Math.random() * ind.polygons.length);
@@ -212,7 +234,10 @@ class GA {
 
     const next = [this._cloneInd(this.population[bestIdx])];
     while (next.length < this.cfg.populationSize) {
-      const child = this._crossover(this._tournamentSelect(), this._tournamentSelect());
+      const child = this._crossover(
+        this._tournamentSelect(),
+        this._tournamentSelect(),
+      );
       this._mutate(child);
       next.push(child);
     }
@@ -232,8 +257,11 @@ class GA {
       polygons: polygons.map((p) =>
         GA._polyFill({
           points: p.points.map((pt) => ({ x: pt.x, y: pt.y })),
-          r: p.r, g: p.g, b: p.b, a: p.a,
-        })
+          r: p.r,
+          g: p.g,
+          b: p.b,
+          a: p.a,
+        }),
       ),
     };
     this.population[worstIdx] = migrant;

@@ -1,11 +1,15 @@
 // GA Web Worker — runs the evolution loop off the main thread.
 // Bundled separately by bun as its own entry point.
 
+import { diffToSimilarity, pixelDiffJS } from "./fitness.js";
 import {
-  polyFill, createRandomPolygon, clonePolygon, cloneIndividual,
-  createIndividual, crossover, mutate, tournamentSelect,
+  cloneIndividual,
+  createIndividual,
+  crossover,
+  mutate,
+  polyFill,
+  tournamentSelect,
 } from "./operators.js";
-import { pixelDiffJS, diffToSimilarity } from "./fitness.js";
 
 let running = false;
 let generation = 0;
@@ -23,11 +27,13 @@ let canvas, ctx;
 let wasmDiff = null;
 let wasmMem = null;
 let wasmBuf = null;
-let pixelLen = 0;
+let _pixelLen = 0;
 
 // Reduced-resolution fitness canvas
 let fitCanvas, fitCtx;
-let fitW = 0, fitH = 0, fitPixelLen = 0;
+let fitW = 0,
+  fitH = 0,
+  fitPixelLen = 0;
 
 // Load Wasm
 const wasmReady = fetch("fitness.wasm")
@@ -38,7 +44,7 @@ const wasmReady = fetch("fitness.wasm")
     wasmMem = instance.exports.memory;
   });
 
-self.onmessage = async function (e) {
+self.onmessage = async (e) => {
   const { type, ...data } = e.data;
 
   if (type === "start") {
@@ -48,7 +54,7 @@ self.onmessage = async function (e) {
     width = data.width;
     height = data.height;
     config = data.config;
-    pixelLen = width * height * 4;
+    _pixelLen = width * height * 4;
 
     canvas = new OffscreenCanvas(width, height);
     ctx = canvas.getContext("2d", { willReadFrequently: true });
@@ -88,16 +94,13 @@ self.onmessage = async function (e) {
       initPopulation();
     }
     runGA();
-
   } else if (type === "stop") {
     running = false;
-
   } else if (type === "resume") {
     if (!running && population.length > 0) {
       running = true;
       runGA();
     }
-
   } else if (type === "migrate") {
     if (population.length > 0 && data.polygons) {
       let worstIdx = 0;
@@ -105,10 +108,15 @@ self.onmessage = async function (e) {
         if (fitnesses[i] > fitnesses[worstIdx]) worstIdx = i;
       }
       const migrant = {
-        polygons: data.polygons.map((p) => polyFill({
-          points: p.points.map((pt) => ({ x: pt.x, y: pt.y })),
-          r: p.r, g: p.g, b: p.b, a: p.a,
-        })),
+        polygons: data.polygons.map((p) =>
+          polyFill({
+            points: p.points.map((pt) => ({ x: pt.x, y: pt.y })),
+            r: p.r,
+            g: p.g,
+            b: p.b,
+            a: p.a,
+          }),
+        ),
       };
       population[worstIdx] = migrant;
       fitnesses[worstIdx] = Infinity;
@@ -129,10 +137,15 @@ function initPopulation() {
 
 function warmStartPopulation(polygons) {
   const seed = {
-    polygons: polygons.map((p) => polyFill({
-      points: p.points.map((pt) => ({ x: pt.x, y: pt.y })),
-      r: p.r, g: p.g, b: p.b, a: p.a,
-    })),
+    polygons: polygons.map((p) =>
+      polyFill({
+        points: p.points.map((pt) => ({ x: pt.x, y: pt.y })),
+        r: p.r,
+        g: p.g,
+        b: p.b,
+        a: p.a,
+      }),
+    ),
   };
   population = [];
   fitnesses = [];
