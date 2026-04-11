@@ -1,0 +1,10 @@
+{
+  "name": "polygon-ga",
+  "private": true,
+  "scripts": {
+    "bench": "node bench.js"
+  },
+  "dependencies": {
+    "@napi-rs/canvas": "^0.1.65"
+  }
+}

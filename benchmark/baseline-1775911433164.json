@@ -1,0 +1,3090 @@
+{
+  "image": "reference.jpg",
+  "date": "2026-04-11T12:43:53.164Z",
+  "node": "v22.14.0",
+  "platform": "darwin/arm64",
+  "durationMs": 30000,
+  "warmupMs": 3000,
+  "results": [
+    {
+      "label": "64px / 50pop / 50poly",
+      "config": {
+        "numVertices": 6,
+        "mutationRate": 0.03,
+        "tournamentSize": 5,
+        "label": "64px / 50pop / 50poly",
+        "workRes": 64,
+        "populationSize": 50,
+        "numPolygons": 50
+      },
+      "workSize": "64x43",
+      "generations": 3165,
+      "genPerSec": 105.5,
+      "similarity": 99.32,
+      "elapsedSec": 30,
+      "samples": [
+        {
+          "gen": 57,
+          "similarity": 99.232,
+          "time": 0.51
+        },
+        {
+          "gen": 107,
+          "similarity": 99.24,
+          "time": 1.01
+        },
+        {
+          "gen": 157,
+          "similarity": 99.241,
+          "time": 1.51
+        },
+        {
+          "gen": 203,
+          "similarity": 99.251,
+          "time": 2.02
+        },
+        {
+          "gen": 255,
+          "similarity": 99.254,
+          "time": 2.53
+        },
+        {
+          "gen": 306,
+          "similarity": 99.256,
+          "time": 3.03
+        },
+        {
+          "gen": 358,
+          "similarity": 99.256,
+          "time": 3.54
+        },
+        {
+          "gen": 410,
+          "similarity": 99.259,
+          "time": 4.05
+        },
+        {
+          "gen": 460,
+          "similarity": 99.26,
+          "time": 4.56
+        },
+        {
+          "gen": 510,
+          "similarity": 99.263,
+          "time": 5.06
+        },
+        {
+          "gen": 560,
+          "similarity": 99.263,
+          "time": 5.57
+        },
+        {
+          "gen": 610,
+          "similarity": 99.265,
+          "time": 6.08
+        },
+        {
+          "gen": 659,
+          "similarity": 99.267,
+          "time": 6.59
+        },
+        {
+          "gen": 708,
+          "similarity": 99.274,
+          "time": 7.1
+        },
+        {
+          "gen": 757,
+          "similarity": 99.274,
+          "time": 7.61
+        },
+        {
+          "gen": 805,
+          "similarity": 99.274,
+          "time": 8.11
+        },
+        {
+          "gen": 854,
+          "similarity": 99.28,
+          "time": 8.62
+        },
+        {
+          "gen": 903,
+          "similarity": 99.281,
+          "time": 9.13
+        },
+        {
+          "gen": 951,
+          "similarity": 99.281,
+          "time": 9.63
+        },
+        {
+          "gen": 1000,
+          "similarity": 99.289,
+          "time": 10.13
+        },
+        {
+          "gen": 1048,
+          "similarity": 99.292,
+          "time": 10.64
+        },
+        {
+          "gen": 1092,
+          "similarity": 99.292,
+          "time": 11.15
+        },
+        {
+          "gen": 1140,
+          "similarity": 99.297,
+          "time": 11.66
+        },
+        {
+          "gen": 1185,
+          "similarity": 99.303,
+          "time": 12.16
+        },
+        {
+          "gen": 1233,
+          "similarity": 99.303,
+          "time": 12.66
+        },
+        {
+          "gen": 1281,
+          "similarity": 99.304,
+          "time": 13.17
+        },
+        {
+          "gen": 1329,
+          "similarity": 99.305,
+          "time": 13.67
+        },
+        {
+          "gen": 1376,
+          "similarity": 99.305,
+          "time": 14.18
+        },
+        {
+          "gen": 1422,
+          "similarity": 99.305,
+          "time": 14.68
+        },
+        {
+          "gen": 1470,
+          "similarity": 99.305,
+          "time": 15.19
+        },
+        {
+          "gen": 1518,
+          "similarity": 99.306,
+          "time": 15.7
+        },
+        {
+          "gen": 1566,
+          "similarity": 99.306,
+          "time": 16.21
+        },
+        {
+          "gen": 1614,
+          "similarity": 99.306,
+          "time": 16.72
+        },
+        {
+          "gen": 1662,
+          "similarity": 99.306,
+          "time": 17.23
+        },
+        {
+          "gen": 1710,
+          "similarity": 99.306,
+          "time": 17.74
+        },
+        {
+          "gen": 1757,
+          "similarity": 99.306,
+          "time": 18.24
+        },
+        {
+          "gen": 1805,
+          "similarity": 99.306,
+          "time": 18.75
+        },
+        {
+          "gen": 1863,
+          "similarity": 99.306,
+          "time": 19.26
+        },
+        {
+          "gen": 1924,
+          "similarity": 99.307,
+          "time": 19.76
+        },
+        {
+          "gen": 1985,
+          "similarity": 99.308,
+          "time": 20.26
+        },
+        {
+          "gen": 2047,
+          "similarity": 99.308,
+          "time": 20.77
+        },
+        {
+          "gen": 2108,
+          "similarity": 99.309,
+          "time": 21.27
+        },
+        {
+          "gen": 2169,
+          "similarity": 99.309,
+          "time": 21.77
+        },
+        {
+          "gen": 2229,
+          "similarity": 99.309,
+          "time": 22.28
+        },
+        {
+          "gen": 2290,
+          "similarity": 99.311,
+          "time": 22.78
+        },
+        {
+          "gen": 2351,
+          "similarity": 99.311,
+          "time": 23.29
+        },
+        {
+          "gen": 2411,
+          "similarity": 99.311,
+          "time": 23.79
+        },
+        {
+          "gen": 2472,
+          "similarity": 99.314,
+          "time": 24.29
+        },
+        {
+          "gen": 2532,
+          "similarity": 99.314,
+          "time": 24.79
+        },
+        {
+          "gen": 2593,
+          "similarity": 99.314,
+          "time": 25.3
+        },
+        {
+          "gen": 2654,
+          "similarity": 99.314,
+          "time": 25.8
+        },
+        {
+          "gen": 2715,
+          "similarity": 99.314,
+          "time": 26.3
+        },
+        {
+          "gen": 2776,
+          "similarity": 99.314,
+          "time": 26.8
+        },
+        {
+          "gen": 2838,
+          "similarity": 99.314,
+          "time": 27.31
+        },
+        {
+          "gen": 2900,
+          "similarity": 99.314,
+          "time": 27.82
+        },
+        {
+          "gen": 2961,
+          "similarity": 99.314,
+          "time": 28.32
+        },
+        {
+          "gen": 3022,
+          "similarity": 99.314,
+          "time": 28.82
+        },
+        {
+          "gen": 3083,
+          "similarity": 99.315,
+          "time": 29.33
+        },
+        {
+          "gen": 3144,
+          "similarity": 99.316,
+          "time": 29.83
+        }
+      ]
+    },
+    {
+      "label": "128px / 50pop / 50poly",
+      "config": {
+        "numVertices": 6,
+        "mutationRate": 0.03,
+        "tournamentSize": 5,
+        "label": "128px / 50pop / 50poly",
+        "workRes": 128,
+        "populationSize": 50,
+        "numPolygons": 50
+      },
+      "workSize": "128x85",
+      "generations": 1913,
+      "genPerSec": 63.7,
+      "similarity": 99.21,
+      "elapsedSec": 30,
+      "samples": [
+        {
+          "gen": 35,
+          "similarity": 99.045,
+          "time": 0.51
+        },
+        {
+          "gen": 69,
+          "similarity": 99.049,
+          "time": 1.02
+        },
+        {
+          "gen": 102,
+          "similarity": 99.051,
+          "time": 1.53
+        },
+        {
+          "gen": 136,
+          "similarity": 99.059,
+          "time": 2.03
+        },
+        {
+          "gen": 170,
+          "similarity": 99.059,
+          "time": 2.53
+        },
+        {
+          "gen": 204,
+          "similarity": 99.068,
+          "time": 3.04
+        },
+        {
+          "gen": 239,
+          "similarity": 99.068,
+          "time": 3.54
+        },
+        {
+          "gen": 274,
+          "similarity": 99.074,
+          "time": 4.05
+        },
+        {
+          "gen": 309,
+          "similarity": 99.081,
+          "time": 4.57
+        },
+        {
+          "gen": 344,
+          "similarity": 99.081,
+          "time": 5.08
+        },
+        {
+          "gen": 379,
+          "similarity": 99.09,
+          "time": 5.58
+        },
+        {
+          "gen": 414,
+          "similarity": 99.1,
+          "time": 6.09
+        },
+        {
+          "gen": 448,
+          "similarity": 99.102,
+          "time": 6.59
+        },
+        {
+          "gen": 482,
+          "similarity": 99.114,
+          "time": 7.1
+        },
+        {
+          "gen": 515,
+          "similarity": 99.114,
+          "time": 7.6
+        },
+        {
+          "gen": 549,
+          "similarity": 99.114,
+          "time": 8.11
+        },
+        {
+          "gen": 582,
+          "similarity": 99.117,
+          "time": 8.62
+        },
+        {
+          "gen": 614,
+          "similarity": 99.13,
+          "time": 9.13
+        },
+        {
+          "gen": 646,
+          "similarity": 99.141,
+          "time": 9.64
+        },
+        {
+          "gen": 678,
+          "similarity": 99.148,
+          "time": 10.15
+        },
+        {
+          "gen": 710,
+          "similarity": 99.148,
+          "time": 10.65
+        },
+        {
+          "gen": 742,
+          "similarity": 99.157,
+          "time": 11.16
+        },
+        {
+          "gen": 774,
+          "similarity": 99.168,
+          "time": 11.67
+        },
+        {
+          "gen": 806,
+          "similarity": 99.172,
+          "time": 12.18
+        },
+        {
+          "gen": 838,
+          "similarity": 99.175,
+          "time": 12.69
+        },
+        {
+          "gen": 869,
+          "similarity": 99.175,
+          "time": 13.19
+        },
+        {
+          "gen": 901,
+          "similarity": 99.175,
+          "time": 13.69
+        },
+        {
+          "gen": 933,
+          "similarity": 99.175,
+          "time": 14.21
+        },
+        {
+          "gen": 965,
+          "similarity": 99.178,
+          "time": 14.72
+        },
+        {
+          "gen": 997,
+          "similarity": 99.181,
+          "time": 15.23
+        },
+        {
+          "gen": 1029,
+          "similarity": 99.183,
+          "time": 15.74
+        },
+        {
+          "gen": 1061,
+          "similarity": 99.187,
+          "time": 16.25
+        },
+        {
+          "gen": 1093,
+          "similarity": 99.188,
+          "time": 16.76
+        },
+        {
+          "gen": 1125,
+          "similarity": 99.19,
+          "time": 17.26
+        },
+        {
+          "gen": 1157,
+          "similarity": 99.19,
+          "time": 17.78
+        },
+        {
+          "gen": 1189,
+          "similarity": 99.19,
+          "time": 18.29
+        },
+        {
+          "gen": 1221,
+          "similarity": 99.19,
+          "time": 18.81
+        },
+        {
+          "gen": 1252,
+          "similarity": 99.192,
+          "time": 19.32
+        },
+        {
+          "gen": 1284,
+          "similarity": 99.192,
+          "time": 19.83
+        },
+        {
+          "gen": 1315,
+          "similarity": 99.194,
+          "time": 20.33
+        },
+        {
+          "gen": 1347,
+          "similarity": 99.194,
+          "time": 20.84
+        },
+        {
+          "gen": 1379,
+          "similarity": 99.196,
+          "time": 21.35
+        },
+        {
+          "gen": 1410,
+          "similarity": 99.196,
+          "time": 21.86
+        },
+        {
+          "gen": 1442,
+          "similarity": 99.196,
+          "time": 22.38
+        },
+        {
+          "gen": 1474,
+          "similarity": 99.196,
+          "time": 22.89
+        },
+        {
+          "gen": 1506,
+          "similarity": 99.196,
+          "time": 23.41
+        },
+        {
+          "gen": 1538,
+          "similarity": 99.196,
+          "time": 23.92
+        },
+        {
+          "gen": 1570,
+          "similarity": 99.196,
+          "time": 24.44
+        },
+        {
+          "gen": 1602,
+          "similarity": 99.196,
+          "time": 24.95
+        },
+        {
+          "gen": 1633,
+          "similarity": 99.197,
+          "time": 25.45
+        },
+        {
+          "gen": 1664,
+          "similarity": 99.197,
+          "time": 25.95
+        },
+        {
+          "gen": 1696,
+          "similarity": 99.202,
+          "time": 26.47
+        },
+        {
+          "gen": 1728,
+          "similarity": 99.21,
+          "time": 26.98
+        },
+        {
+          "gen": 1759,
+          "similarity": 99.21,
+          "time": 27.49
+        },
+        {
+          "gen": 1790,
+          "similarity": 99.21,
+          "time": 27.99
+        },
+        {
+          "gen": 1821,
+          "similarity": 99.211,
+          "time": 28.49
+        },
+        {
+          "gen": 1851,
+          "similarity": 99.211,
+          "time": 29
+        },
+        {
+          "gen": 1882,
+          "similarity": 99.211,
+          "time": 29.51
+        },
+        {
+          "gen": 1913,
+          "similarity": 99.212,
+          "time": 30.01
+        }
+      ]
+    },
+    {
+      "label": "256px / 50pop / 50poly",
+      "config": {
+        "numVertices": 6,
+        "mutationRate": 0.03,
+        "tournamentSize": 5,
+        "label": "256px / 50pop / 50poly",
+        "workRes": 256,
+        "populationSize": 50,
+        "numPolygons": 50
+      },
+      "workSize": "256x171",
+      "generations": 983,
+      "genPerSec": 32.7,
+      "similarity": 99.18,
+      "elapsedSec": 30,
+      "samples": [
+        {
+          "gen": 19,
+          "similarity": 98.985,
+          "time": 0.52
+        },
+        {
+          "gen": 37,
+          "similarity": 98.993,
+          "time": 1.03
+        },
+        {
+          "gen": 55,
+          "similarity": 99.007,
+          "time": 1.54
+        },
+        {
+          "gen": 73,
+          "similarity": 99.01,
+          "time": 2.05
+        },
+        {
+          "gen": 91,
+          "similarity": 99.031,
+          "time": 2.56
+        },
+        {
+          "gen": 109,
+          "similarity": 99.035,
+          "time": 3.08
+        },
+        {
+          "gen": 127,
+          "similarity": 99.052,
+          "time": 3.59
+        },
+        {
+          "gen": 145,
+          "similarity": 99.062,
+          "time": 4.12
+        },
+        {
+          "gen": 162,
+          "similarity": 99.08,
+          "time": 4.63
+        },
+        {
+          "gen": 179,
+          "similarity": 99.112,
+          "time": 5.15
+        },
+        {
+          "gen": 196,
+          "similarity": 99.114,
+          "time": 5.66
+        },
+        {
+          "gen": 212,
+          "similarity": 99.115,
+          "time": 6.16
+        },
+        {
+          "gen": 229,
+          "similarity": 99.117,
+          "time": 6.67
+        },
+        {
+          "gen": 246,
+          "similarity": 99.12,
+          "time": 7.19
+        },
+        {
+          "gen": 263,
+          "similarity": 99.127,
+          "time": 7.71
+        },
+        {
+          "gen": 280,
+          "similarity": 99.139,
+          "time": 8.23
+        },
+        {
+          "gen": 297,
+          "similarity": 99.144,
+          "time": 8.76
+        },
+        {
+          "gen": 314,
+          "similarity": 99.149,
+          "time": 9.28
+        },
+        {
+          "gen": 331,
+          "similarity": 99.149,
+          "time": 9.8
+        },
+        {
+          "gen": 348,
+          "similarity": 99.15,
+          "time": 10.32
+        },
+        {
+          "gen": 365,
+          "similarity": 99.15,
+          "time": 10.84
+        },
+        {
+          "gen": 382,
+          "similarity": 99.152,
+          "time": 11.37
+        },
+        {
+          "gen": 398,
+          "similarity": 99.156,
+          "time": 11.87
+        },
+        {
+          "gen": 415,
+          "similarity": 99.16,
+          "time": 12.4
+        },
+        {
+          "gen": 432,
+          "similarity": 99.161,
+          "time": 12.93
+        },
+        {
+          "gen": 449,
+          "similarity": 99.161,
+          "time": 13.46
+        },
+        {
+          "gen": 465,
+          "similarity": 99.161,
+          "time": 13.98
+        },
+        {
+          "gen": 481,
+          "similarity": 99.161,
+          "time": 14.5
+        },
+        {
+          "gen": 497,
+          "similarity": 99.161,
+          "time": 15.01
+        },
+        {
+          "gen": 514,
+          "similarity": 99.161,
+          "time": 15.53
+        },
+        {
+          "gen": 530,
+          "similarity": 99.162,
+          "time": 16.03
+        },
+        {
+          "gen": 547,
+          "similarity": 99.163,
+          "time": 16.55
+        },
+        {
+          "gen": 564,
+          "similarity": 99.163,
+          "time": 17.07
+        },
+        {
+          "gen": 581,
+          "similarity": 99.163,
+          "time": 17.59
+        },
+        {
+          "gen": 598,
+          "similarity": 99.163,
+          "time": 18.1
+        },
+        {
+          "gen": 615,
+          "similarity": 99.163,
+          "time": 18.62
+        },
+        {
+          "gen": 632,
+          "similarity": 99.163,
+          "time": 19.13
+        },
+        {
+          "gen": 649,
+          "similarity": 99.163,
+          "time": 19.64
+        },
+        {
+          "gen": 666,
+          "similarity": 99.163,
+          "time": 20.16
+        },
+        {
+          "gen": 683,
+          "similarity": 99.163,
+          "time": 20.68
+        },
+        {
+          "gen": 700,
+          "similarity": 99.164,
+          "time": 21.2
+        },
+        {
+          "gen": 717,
+          "similarity": 99.167,
+          "time": 21.72
+        },
+        {
+          "gen": 734,
+          "similarity": 99.167,
+          "time": 22.25
+        },
+        {
+          "gen": 751,
+          "similarity": 99.167,
+          "time": 22.77
+        },
+        {
+          "gen": 768,
+          "similarity": 99.167,
+          "time": 23.29
+        },
+        {
+          "gen": 785,
+          "similarity": 99.167,
+          "time": 23.82
+        },
+        {
+          "gen": 802,
+          "similarity": 99.167,
+          "time": 24.35
+        },
+        {
+          "gen": 819,
+          "similarity": 99.167,
+          "time": 24.87
+        },
+        {
+          "gen": 836,
+          "similarity": 99.167,
+          "time": 25.4
+        },
+        {
+          "gen": 852,
+          "similarity": 99.167,
+          "time": 25.9
+        },
+        {
+          "gen": 868,
+          "similarity": 99.167,
+          "time": 26.4
+        },
+        {
+          "gen": 884,
+          "similarity": 99.176,
+          "time": 26.9
+        },
+        {
+          "gen": 901,
+          "similarity": 99.176,
+          "time": 27.43
+        },
+        {
+          "gen": 918,
+          "similarity": 99.176,
+          "time": 27.95
+        },
+        {
+          "gen": 934,
+          "similarity": 99.176,
+          "time": 28.46
+        },
+        {
+          "gen": 950,
+          "similarity": 99.177,
+          "time": 28.99
+        },
+        {
+          "gen": 966,
+          "similarity": 99.177,
+          "time": 29.49
+        },
+        {
+          "gen": 982,
+          "similarity": 99.177,
+          "time": 29.99
+        }
+      ]
+    },
+    {
+      "label": "384px / 50pop / 50poly",
+      "config": {
+        "numVertices": 6,
+        "mutationRate": 0.03,
+        "tournamentSize": 5,
+        "label": "384px / 50pop / 50poly",
+        "workRes": 384,
+        "populationSize": 50,
+        "numPolygons": 50
+      },
+      "workSize": "384x256",
+      "generations": 607,
+      "genPerSec": 20.2,
+      "similarity": 99.2,
+      "elapsedSec": 30,
+      "samples": [
+        {
+          "gen": 12,
+          "similarity": 98.796,
+          "time": 0.52
+        },
+        {
+          "gen": 24,
+          "similarity": 98.826,
+          "time": 1.04
+        },
+        {
+          "gen": 36,
+          "similarity": 98.858,
+          "time": 1.57
+        },
+        {
+          "gen": 48,
+          "similarity": 98.864,
+          "time": 2.09
+        },
+        {
+          "gen": 60,
+          "similarity": 98.891,
+          "time": 2.62
+        },
+        {
+          "gen": 71,
+          "similarity": 98.912,
+          "time": 3.14
+        },
+        {
+          "gen": 82,
+          "similarity": 98.928,
+          "time": 3.64
+        },
+        {
+          "gen": 93,
+          "similarity": 98.932,
+          "time": 4.15
+        },
+        {
+          "gen": 104,
+          "similarity": 98.948,
+          "time": 4.66
+        },
+        {
+          "gen": 115,
+          "similarity": 98.994,
+          "time": 5.17
+        },
+        {
+          "gen": 126,
+          "similarity": 98.999,
+          "time": 5.7
+        },
+        {
+          "gen": 137,
+          "similarity": 99.023,
+          "time": 6.22
+        },
+        {
+          "gen": 146,
+          "similarity": 99.045,
+          "time": 6.75
+        },
+        {
+          "gen": 157,
+          "similarity": 99.046,
+          "time": 7.29
+        },
+        {
+          "gen": 168,
+          "similarity": 99.058,
+          "time": 7.84
+        },
+        {
+          "gen": 179,
+          "similarity": 99.064,
+          "time": 8.39
+        },
+        {
+          "gen": 190,
+          "similarity": 99.083,
+          "time": 8.92
+        },
+        {
+          "gen": 201,
+          "similarity": 99.083,
+          "time": 9.46
+        },
+        {
+          "gen": 211,
+          "similarity": 99.083,
+          "time": 9.99
+        },
+        {
+          "gen": 221,
+          "similarity": 99.095,
+          "time": 10.53
+        },
+        {
+          "gen": 231,
+          "similarity": 99.103,
+          "time": 11.03
+        },
+        {
+          "gen": 241,
+          "similarity": 99.103,
+          "time": 11.54
+        },
+        {
+          "gen": 252,
+          "similarity": 99.107,
+          "time": 12.08
+        },
+        {
+          "gen": 262,
+          "similarity": 99.114,
+          "time": 12.59
+        },
+        {
+          "gen": 272,
+          "similarity": 99.121,
+          "time": 13.11
+        },
+        {
+          "gen": 282,
+          "similarity": 99.126,
+          "time": 13.62
+        },
+        {
+          "gen": 292,
+          "similarity": 99.129,
+          "time": 14.13
+        },
+        {
+          "gen": 302,
+          "similarity": 99.144,
+          "time": 14.64
+        },
+        {
+          "gen": 312,
+          "similarity": 99.162,
+          "time": 15.14
+        },
+        {
+          "gen": 322,
+          "similarity": 99.167,
+          "time": 15.65
+        },
+        {
+          "gen": 332,
+          "similarity": 99.167,
+          "time": 16.16
+        },
+        {
+          "gen": 342,
+          "similarity": 99.169,
+          "time": 16.66
+        },
+        {
+          "gen": 352,
+          "similarity": 99.169,
+          "time": 17.16
+        },
+        {
+          "gen": 362,
+          "similarity": 99.169,
+          "time": 17.67
+        },
+        {
+          "gen": 372,
+          "similarity": 99.174,
+          "time": 18.19
+        },
+        {
+          "gen": 382,
+          "similarity": 99.174,
+          "time": 18.69
+        },
+        {
+          "gen": 392,
+          "similarity": 99.174,
+          "time": 19.2
+        },
+        {
+          "gen": 402,
+          "similarity": 99.175,
+          "time": 19.7
+        },
+        {
+          "gen": 412,
+          "similarity": 99.176,
+          "time": 20.2
+        },
+        {
+          "gen": 422,
+          "similarity": 99.178,
+          "time": 20.71
+        },
+        {
+          "gen": 432,
+          "similarity": 99.178,
+          "time": 21.21
+        },
+        {
+          "gen": 442,
+          "similarity": 99.178,
+          "time": 21.72
+        },
+        {
+          "gen": 452,
+          "similarity": 99.178,
+          "time": 22.23
+        },
+        {
+          "gen": 463,
+          "similarity": 99.178,
+          "time": 22.79
+        },
+        {
+          "gen": 473,
+          "similarity": 99.185,
+          "time": 23.31
+        },
+        {
+          "gen": 483,
+          "similarity": 99.185,
+          "time": 23.82
+        },
+        {
+          "gen": 494,
+          "similarity": 99.185,
+          "time": 24.37
+        },
+        {
+          "gen": 505,
+          "similarity": 99.186,
+          "time": 24.92
+        },
+        {
+          "gen": 515,
+          "similarity": 99.186,
+          "time": 25.42
+        },
+        {
+          "gen": 525,
+          "similarity": 99.187,
+          "time": 25.94
+        },
+        {
+          "gen": 535,
+          "similarity": 99.187,
+          "time": 26.44
+        },
+        {
+          "gen": 545,
+          "similarity": 99.187,
+          "time": 26.95
+        },
+        {
+          "gen": 556,
+          "similarity": 99.187,
+          "time": 27.5
+        },
+        {
+          "gen": 566,
+          "similarity": 99.187,
+          "time": 28
+        },
+        {
+          "gen": 576,
+          "similarity": 99.189,
+          "time": 28.51
+        },
+        {
+          "gen": 587,
+          "similarity": 99.19,
+          "time": 29.05
+        },
+        {
+          "gen": 598,
+          "similarity": 99.198,
+          "time": 29.59
+        }
+      ]
+    },
+    {
+      "label": "128px / 25pop / 50poly",
+      "config": {
+        "numVertices": 6,
+        "mutationRate": 0.03,
+        "tournamentSize": 5,
+        "label": "128px / 25pop / 50poly",
+        "workRes": 128,
+        "populationSize": 25,
+        "numPolygons": 50
+      },
+      "workSize": "128x85",
+      "generations": 3616,
+      "genPerSec": 120.5,
+      "similarity": 99.27,
+      "elapsedSec": 30,
+      "samples": [
+        {
+          "gen": 66,
+          "similarity": 99.141,
+          "time": 0.51
+        },
+        {
+          "gen": 129,
+          "similarity": 99.149,
+          "time": 1.01
+        },
+        {
+          "gen": 192,
+          "similarity": 99.149,
+          "time": 1.52
+        },
+        {
+          "gen": 256,
+          "similarity": 99.167,
+          "time": 2.02
+        },
+        {
+          "gen": 317,
+          "similarity": 99.178,
+          "time": 2.53
+        },
+        {
+          "gen": 379,
+          "similarity": 99.18,
+          "time": 3.04
+        },
+        {
+          "gen": 441,
+          "similarity": 99.186,
+          "time": 3.54
+        },
+        {
+          "gen": 502,
+          "similarity": 99.187,
+          "time": 4.04
+        },
+        {
+          "gen": 564,
+          "similarity": 99.187,
+          "time": 4.55
+        },
+        {
+          "gen": 626,
+          "similarity": 99.189,
+          "time": 5.05
+        },
+        {
+          "gen": 686,
+          "similarity": 99.191,
+          "time": 5.56
+        },
+        {
+          "gen": 748,
+          "similarity": 99.193,
+          "time": 6.06
+        },
+        {
+          "gen": 808,
+          "similarity": 99.2,
+          "time": 6.57
+        },
+        {
+          "gen": 869,
+          "similarity": 99.203,
+          "time": 7.08
+        },
+        {
+          "gen": 931,
+          "similarity": 99.203,
+          "time": 7.59
+        },
+        {
+          "gen": 991,
+          "similarity": 99.212,
+          "time": 8.09
+        },
+        {
+          "gen": 1051,
+          "similarity": 99.212,
+          "time": 8.59
+        },
+        {
+          "gen": 1113,
+          "similarity": 99.213,
+          "time": 9.1
+        },
+        {
+          "gen": 1173,
+          "similarity": 99.213,
+          "time": 9.6
+        },
+        {
+          "gen": 1231,
+          "similarity": 99.218,
+          "time": 10.1
+        },
+        {
+          "gen": 1292,
+          "similarity": 99.218,
+          "time": 10.6
+        },
+        {
+          "gen": 1353,
+          "similarity": 99.22,
+          "time": 11.1
+        },
+        {
+          "gen": 1415,
+          "similarity": 99.22,
+          "time": 11.61
+        },
+        {
+          "gen": 1475,
+          "similarity": 99.23,
+          "time": 12.11
+        },
+        {
+          "gen": 1534,
+          "similarity": 99.23,
+          "time": 12.62
+        },
+        {
+          "gen": 1596,
+          "similarity": 99.233,
+          "time": 13.12
+        },
+        {
+          "gen": 1656,
+          "similarity": 99.233,
+          "time": 13.62
+        },
+        {
+          "gen": 1717,
+          "similarity": 99.233,
+          "time": 14.13
+        },
+        {
+          "gen": 1779,
+          "similarity": 99.233,
+          "time": 14.64
+        },
+        {
+          "gen": 1839,
+          "similarity": 99.233,
+          "time": 15.14
+        },
+        {
+          "gen": 1900,
+          "similarity": 99.234,
+          "time": 15.64
+        },
+        {
+          "gen": 1961,
+          "similarity": 99.234,
+          "time": 16.15
+        },
+        {
+          "gen": 2022,
+          "similarity": 99.238,
+          "time": 16.65
+        },
+        {
+          "gen": 2084,
+          "similarity": 99.239,
+          "time": 17.16
+        },
+        {
+          "gen": 2145,
+          "similarity": 99.239,
+          "time": 17.67
+        },
+        {
+          "gen": 2205,
+          "similarity": 99.239,
+          "time": 18.17
+        },
+        {
+          "gen": 2267,
+          "similarity": 99.242,
+          "time": 18.68
+        },
+        {
+          "gen": 2327,
+          "similarity": 99.245,
+          "time": 19.18
+        },
+        {
+          "gen": 2387,
+          "similarity": 99.25,
+          "time": 19.68
+        },
+        {
+          "gen": 2447,
+          "similarity": 99.252,
+          "time": 20.19
+        },
+        {
+          "gen": 2507,
+          "similarity": 99.254,
+          "time": 20.69
+        },
+        {
+          "gen": 2568,
+          "similarity": 99.258,
+          "time": 21.2
+        },
+        {
+          "gen": 2629,
+          "similarity": 99.263,
+          "time": 21.7
+        },
+        {
+          "gen": 2690,
+          "similarity": 99.263,
+          "time": 22.21
+        },
+        {
+          "gen": 2750,
+          "similarity": 99.263,
+          "time": 22.71
+        },
+        {
+          "gen": 2811,
+          "similarity": 99.263,
+          "time": 23.22
+        },
+        {
+          "gen": 2872,
+          "similarity": 99.264,
+          "time": 23.72
+        },
+        {
+          "gen": 2932,
+          "similarity": 99.268,
+          "time": 24.22
+        },
+        {
+          "gen": 2991,
+          "similarity": 99.268,
+          "time": 24.73
+        },
+        {
+          "gen": 3052,
+          "similarity": 99.268,
+          "time": 25.23
+        },
+        {
+          "gen": 3109,
+          "similarity": 99.268,
+          "time": 25.74
+        },
+        {
+          "gen": 3169,
+          "similarity": 99.268,
+          "time": 26.24
+        },
+        {
+          "gen": 3230,
+          "similarity": 99.268,
+          "time": 26.75
+        },
+        {
+          "gen": 3290,
+          "similarity": 99.268,
+          "time": 27.25
+        },
+        {
+          "gen": 3351,
+          "similarity": 99.27,
+          "time": 27.76
+        },
+        {
+          "gen": 3411,
+          "similarity": 99.27,
+          "time": 28.27
+        },
+        {
+          "gen": 3470,
+          "similarity": 99.272,
+          "time": 28.77
+        },
+        {
+          "gen": 3530,
+          "similarity": 99.272,
+          "time": 29.27
+        },
+        {
+          "gen": 3588,
+          "similarity": 99.272,
+          "time": 29.77
+        }
+      ]
+    },
+    {
+      "label": "128px / 100pop / 50poly",
+      "config": {
+        "numVertices": 6,
+        "mutationRate": 0.03,
+        "tournamentSize": 5,
+        "label": "128px / 100pop / 50poly",
+        "workRes": 128,
+        "populationSize": 100,
+        "numPolygons": 50
+      },
+      "workSize": "128x85",
+      "generations": 953,
+      "genPerSec": 31.7,
+      "similarity": 99.22,
+      "elapsedSec": 30,
+      "samples": [
+        {
+          "gen": 17,
+          "similarity": 99.075,
+          "time": 0.51
+        },
+        {
+          "gen": 34,
+          "similarity": 99.095,
+          "time": 1.03
+        },
+        {
+          "gen": 51,
+          "similarity": 99.11,
+          "time": 1.56
+        },
+        {
+          "gen": 68,
+          "similarity": 99.11,
+          "time": 2.08
+        },
+        {
+          "gen": 85,
+          "similarity": 99.11,
+          "time": 2.59
+        },
+        {
+          "gen": 102,
+          "similarity": 99.11,
+          "time": 3.12
+        },
+        {
+          "gen": 119,
+          "similarity": 99.122,
+          "time": 3.64
+        },
+        {
+          "gen": 136,
+          "similarity": 99.122,
+          "time": 4.16
+        },
+        {
+          "gen": 152,
+          "similarity": 99.128,
+          "time": 4.66
+        },
+        {
+          "gen": 168,
+          "similarity": 99.129,
+          "time": 5.17
+        },
+        {
+          "gen": 185,
+          "similarity": 99.129,
+          "time": 5.69
+        },
+        {
+          "gen": 201,
+          "similarity": 99.129,
+          "time": 6.2
+        },
+        {
+          "gen": 217,
+          "similarity": 99.134,
+          "time": 6.72
+        },
+        {
+          "gen": 233,
+          "similarity": 99.14,
+          "time": 7.23
+        },
+        {
+          "gen": 249,
+          "similarity": 99.14,
+          "time": 7.73
+        },
+        {
+          "gen": 265,
+          "similarity": 99.142,
+          "time": 8.23
+        },
+        {
+          "gen": 282,
+          "similarity": 99.148,
+          "time": 8.76
+        },
+        {
+          "gen": 298,
+          "similarity": 99.166,
+          "time": 9.26
+        },
+        {
+          "gen": 314,
+          "similarity": 99.167,
+          "time": 9.77
+        },
+        {
+          "gen": 331,
+          "similarity": 99.17,
+          "time": 10.3
+        },
+        {
+          "gen": 347,
+          "similarity": 99.173,
+          "time": 10.82
+        },
+        {
+          "gen": 364,
+          "similarity": 99.173,
+          "time": 11.36
+        },
+        {
+          "gen": 381,
+          "similarity": 99.196,
+          "time": 11.88
+        },
+        {
+          "gen": 397,
+          "similarity": 99.196,
+          "time": 12.39
+        },
+        {
+          "gen": 413,
+          "similarity": 99.196,
+          "time": 12.91
+        },
+        {
+          "gen": 429,
+          "similarity": 99.196,
+          "time": 13.41
+        },
+        {
+          "gen": 445,
+          "similarity": 99.196,
+          "time": 13.92
+        },
+        {
+          "gen": 461,
+          "similarity": 99.196,
+          "time": 14.42
+        },
+        {
+          "gen": 477,
+          "similarity": 99.2,
+          "time": 14.93
+        },
+        {
+          "gen": 493,
+          "similarity": 99.2,
+          "time": 15.44
+        },
+        {
+          "gen": 509,
+          "similarity": 99.2,
+          "time": 15.95
+        },
+        {
+          "gen": 525,
+          "similarity": 99.2,
+          "time": 16.47
+        },
+        {
+          "gen": 541,
+          "similarity": 99.2,
+          "time": 17
+        },
+        {
+          "gen": 557,
+          "similarity": 99.2,
+          "time": 17.51
+        },
+        {
+          "gen": 573,
+          "similarity": 99.202,
+          "time": 18.02
+        },
+        {
+          "gen": 589,
+          "similarity": 99.202,
+          "time": 18.52
+        },
+        {
+          "gen": 606,
+          "similarity": 99.202,
+          "time": 19.04
+        },
+        {
+          "gen": 622,
+          "similarity": 99.208,
+          "time": 19.56
+        },
+        {
+          "gen": 638,
+          "similarity": 99.208,
+          "time": 20.06
+        },
+        {
+          "gen": 655,
+          "similarity": 99.212,
+          "time": 20.59
+        },
+        {
+          "gen": 671,
+          "similarity": 99.212,
+          "time": 21.1
+        },
+        {
+          "gen": 687,
+          "similarity": 99.212,
+          "time": 21.61
+        },
+        {
+          "gen": 703,
+          "similarity": 99.213,
+          "time": 22.11
+        },
+        {
+          "gen": 719,
+          "similarity": 99.213,
+          "time": 22.62
+        },
+        {
+          "gen": 735,
+          "similarity": 99.213,
+          "time": 23.13
+        },
+        {
+          "gen": 752,
+          "similarity": 99.213,
+          "time": 23.66
+        },
+        {
+          "gen": 768,
+          "similarity": 99.213,
+          "time": 24.16
+        },
+        {
+          "gen": 784,
+          "similarity": 99.213,
+          "time": 24.66
+        },
+        {
+          "gen": 800,
+          "similarity": 99.213,
+          "time": 25.17
+        },
+        {
+          "gen": 815,
+          "similarity": 99.213,
+          "time": 25.67
+        },
+        {
+          "gen": 831,
+          "similarity": 99.213,
+          "time": 26.18
+        },
+        {
+          "gen": 848,
+          "similarity": 99.213,
+          "time": 26.71
+        },
+        {
+          "gen": 864,
+          "similarity": 99.213,
+          "time": 27.22
+        },
+        {
+          "gen": 880,
+          "similarity": 99.213,
+          "time": 27.72
+        },
+        {
+          "gen": 897,
+          "similarity": 99.217,
+          "time": 28.25
+        },
+        {
+          "gen": 913,
+          "similarity": 99.217,
+          "time": 28.75
+        },
+        {
+          "gen": 929,
+          "similarity": 99.217,
+          "time": 29.26
+        },
+        {
+          "gen": 945,
+          "similarity": 99.217,
+          "time": 29.77
+        }
+      ]
+    },
+    {
+      "label": "128px / 200pop / 50poly",
+      "config": {
+        "numVertices": 6,
+        "mutationRate": 0.03,
+        "tournamentSize": 5,
+        "label": "128px / 200pop / 50poly",
+        "workRes": 128,
+        "populationSize": 200,
+        "numPolygons": 50
+      },
+      "workSize": "128x85",
+      "generations": 440,
+      "genPerSec": 14.7,
+      "similarity": 99.25,
+      "elapsedSec": 30,
+      "samples": [
+        {
+          "gen": 9,
+          "similarity": 98.931,
+          "time": 0.51
+        },
+        {
+          "gen": 18,
+          "similarity": 98.946,
+          "time": 1.03
+        },
+        {
+          "gen": 27,
+          "similarity": 99.004,
+          "time": 1.55
+        },
+        {
+          "gen": 36,
+          "similarity": 99.023,
+          "time": 2.09
+        },
+        {
+          "gen": 45,
+          "similarity": 99.033,
+          "time": 2.64
+        },
+        {
+          "gen": 54,
+          "similarity": 99.039,
+          "time": 3.19
+        },
+        {
+          "gen": 62,
+          "similarity": 99.039,
+          "time": 3.69
+        },
+        {
+          "gen": 71,
+          "similarity": 99.065,
+          "time": 4.25
+        },
+        {
+          "gen": 79,
+          "similarity": 99.076,
+          "time": 4.77
+        },
+        {
+          "gen": 87,
+          "similarity": 99.089,
+          "time": 5.28
+        },
+        {
+          "gen": 95,
+          "similarity": 99.123,
+          "time": 5.8
+        },
+        {
+          "gen": 103,
+          "similarity": 99.129,
+          "time": 6.34
+        },
+        {
+          "gen": 111,
+          "similarity": 99.132,
+          "time": 6.89
+        },
+        {
+          "gen": 119,
+          "similarity": 99.137,
+          "time": 7.43
+        },
+        {
+          "gen": 127,
+          "similarity": 99.143,
+          "time": 7.97
+        },
+        {
+          "gen": 135,
+          "similarity": 99.158,
+          "time": 8.51
+        },
+        {
+          "gen": 143,
+          "similarity": 99.17,
+          "time": 9.06
+        },
+        {
+          "gen": 151,
+          "similarity": 99.17,
+          "time": 9.6
+        },
+        {
+          "gen": 159,
+          "similarity": 99.17,
+          "time": 10.15
+        },
+        {
+          "gen": 167,
+          "similarity": 99.17,
+          "time": 10.69
+        },
+        {
+          "gen": 175,
+          "similarity": 99.179,
+          "time": 11.22
+        },
+        {
+          "gen": 183,
+          "similarity": 99.19,
+          "time": 11.76
+        },
+        {
+          "gen": 191,
+          "similarity": 99.192,
+          "time": 12.3
+        },
+        {
+          "gen": 199,
+          "similarity": 99.199,
+          "time": 12.86
+        },
+        {
+          "gen": 207,
+          "similarity": 99.211,
+          "time": 13.42
+        },
+        {
+          "gen": 214,
+          "similarity": 99.213,
+          "time": 13.93
+        },
+        {
+          "gen": 221,
+          "similarity": 99.213,
+          "time": 14.43
+        },
+        {
+          "gen": 229,
+          "similarity": 99.215,
+          "time": 15
+        },
+        {
+          "gen": 237,
+          "similarity": 99.225,
+          "time": 15.57
+        },
+        {
+          "gen": 244,
+          "similarity": 99.233,
+          "time": 16.07
+        },
+        {
+          "gen": 252,
+          "similarity": 99.233,
+          "time": 16.64
+        },
+        {
+          "gen": 260,
+          "similarity": 99.233,
+          "time": 17.21
+        },
+        {
+          "gen": 268,
+          "similarity": 99.233,
+          "time": 17.78
+        },
+        {
+          "gen": 276,
+          "similarity": 99.233,
+          "time": 18.34
+        },
+        {
+          "gen": 284,
+          "similarity": 99.233,
+          "time": 18.9
+        },
+        {
+          "gen": 292,
+          "similarity": 99.238,
+          "time": 19.46
+        },
+        {
+          "gen": 300,
+          "similarity": 99.239,
+          "time": 20.02
+        },
+        {
+          "gen": 308,
+          "similarity": 99.242,
+          "time": 20.59
+        },
+        {
+          "gen": 316,
+          "similarity": 99.242,
+          "time": 21.15
+        },
+        {
+          "gen": 324,
+          "similarity": 99.242,
+          "time": 21.72
+        },
+        {
+          "gen": 332,
+          "similarity": 99.242,
+          "time": 22.29
+        },
+        {
+          "gen": 340,
+          "similarity": 99.242,
+          "time": 22.85
+        },
+        {
+          "gen": 347,
+          "similarity": 99.242,
+          "time": 23.35
+        },
+        {
+          "gen": 354,
+          "similarity": 99.242,
+          "time": 23.86
+        },
+        {
+          "gen": 361,
+          "similarity": 99.242,
+          "time": 24.37
+        },
+        {
+          "gen": 369,
+          "similarity": 99.242,
+          "time": 24.94
+        },
+        {
+          "gen": 377,
+          "similarity": 99.242,
+          "time": 25.5
+        },
+        {
+          "gen": 385,
+          "similarity": 99.242,
+          "time": 26.07
+        },
+        {
+          "gen": 392,
+          "similarity": 99.242,
+          "time": 26.58
+        },
+        {
+          "gen": 399,
+          "similarity": 99.242,
+          "time": 27.09
+        },
+        {
+          "gen": 406,
+          "similarity": 99.246,
+          "time": 27.59
+        },
+        {
+          "gen": 413,
+          "similarity": 99.246,
+          "time": 28.1
+        },
+        {
+          "gen": 421,
+          "similarity": 99.246,
+          "time": 28.67
+        },
+        {
+          "gen": 429,
+          "similarity": 99.246,
+          "time": 29.23
+        },
+        {
+          "gen": 436,
+          "similarity": 99.246,
+          "time": 29.73
+        }
+      ]
+    },
+    {
+      "label": "128px / 50pop / 25poly",
+      "config": {
+        "numVertices": 6,
+        "mutationRate": 0.03,
+        "tournamentSize": 5,
+        "label": "128px / 50pop / 25poly",
+        "workRes": 128,
+        "populationSize": 50,
+        "numPolygons": 25
+      },
+      "workSize": "128x85",
+      "generations": 3099,
+      "genPerSec": 103.3,
+      "similarity": 99.29,
+      "elapsedSec": 30,
+      "samples": [
+        {
+          "gen": 56,
+          "similarity": 99.127,
+          "time": 0.51
+        },
+        {
+          "gen": 110,
+          "similarity": 99.144,
+          "time": 1.02
+        },
+        {
+          "gen": 164,
+          "similarity": 99.158,
+          "time": 1.52
+        },
+        {
+          "gen": 219,
+          "similarity": 99.17,
+          "time": 2.02
+        },
+        {
+          "gen": 272,
+          "similarity": 99.182,
+          "time": 2.52
+        },
+        {
+          "gen": 324,
+          "similarity": 99.187,
+          "time": 3.03
+        },
+        {
+          "gen": 376,
+          "similarity": 99.199,
+          "time": 3.53
+        },
+        {
+          "gen": 428,
+          "similarity": 99.205,
+          "time": 4.04
+        },
+        {
+          "gen": 480,
+          "similarity": 99.21,
+          "time": 4.54
+        },
+        {
+          "gen": 532,
+          "similarity": 99.215,
+          "time": 5.04
+        },
+        {
+          "gen": 584,
+          "similarity": 99.219,
+          "time": 5.55
+        },
+        {
+          "gen": 637,
+          "similarity": 99.222,
+          "time": 6.06
+        },
+        {
+          "gen": 691,
+          "similarity": 99.224,
+          "time": 6.56
+        },
+        {
+          "gen": 744,
+          "similarity": 99.228,
+          "time": 7.07
+        },
+        {
+          "gen": 797,
+          "similarity": 99.228,
+          "time": 7.58
+        },
+        {
+          "gen": 851,
+          "similarity": 99.231,
+          "time": 8.09
+        },
+        {
+          "gen": 903,
+          "similarity": 99.231,
+          "time": 8.6
+        },
+        {
+          "gen": 955,
+          "similarity": 99.232,
+          "time": 9.11
+        },
+        {
+          "gen": 1009,
+          "similarity": 99.234,
+          "time": 9.61
+        },
+        {
+          "gen": 1061,
+          "similarity": 99.243,
+          "time": 10.12
+        },
+        {
+          "gen": 1113,
+          "similarity": 99.243,
+          "time": 10.62
+        },
+        {
+          "gen": 1165,
+          "similarity": 99.243,
+          "time": 11.13
+        },
+        {
+          "gen": 1217,
+          "similarity": 99.246,
+          "time": 11.64
+        },
+        {
+          "gen": 1269,
+          "similarity": 99.246,
+          "time": 12.15
+        },
+        {
+          "gen": 1323,
+          "similarity": 99.249,
+          "time": 12.65
+        },
+        {
+          "gen": 1376,
+          "similarity": 99.253,
+          "time": 13.16
+        },
+        {
+          "gen": 1428,
+          "similarity": 99.253,
+          "time": 13.67
+        },
+        {
+          "gen": 1482,
+          "similarity": 99.253,
+          "time": 14.17
+        },
+        {
+          "gen": 1535,
+          "similarity": 99.253,
+          "time": 14.68
+        },
+        {
+          "gen": 1587,
+          "similarity": 99.253,
+          "time": 15.19
+        },
+        {
+          "gen": 1641,
+          "similarity": 99.253,
+          "time": 15.7
+        },
+        {
+          "gen": 1693,
+          "similarity": 99.253,
+          "time": 16.2
+        },
+        {
+          "gen": 1744,
+          "similarity": 99.253,
+          "time": 16.7
+        },
+        {
+          "gen": 1798,
+          "similarity": 99.253,
+          "time": 17.21
+        },
+        {
+          "gen": 1851,
+          "similarity": 99.256,
+          "time": 17.72
+        },
+        {
+          "gen": 1903,
+          "similarity": 99.259,
+          "time": 18.22
+        },
+        {
+          "gen": 1957,
+          "similarity": 99.264,
+          "time": 18.73
+        },
+        {
+          "gen": 2008,
+          "similarity": 99.266,
+          "time": 19.23
+        },
+        {
+          "gen": 2057,
+          "similarity": 99.268,
+          "time": 19.73
+        },
+        {
+          "gen": 2109,
+          "similarity": 99.271,
+          "time": 20.23
+        },
+        {
+          "gen": 2159,
+          "similarity": 99.271,
+          "time": 20.73
+        },
+        {
+          "gen": 2212,
+          "similarity": 99.271,
+          "time": 21.24
+        },
+        {
+          "gen": 2263,
+          "similarity": 99.271,
+          "time": 21.75
+        },
+        {
+          "gen": 2314,
+          "similarity": 99.271,
+          "time": 22.25
+        },
+        {
+          "gen": 2367,
+          "similarity": 99.271,
+          "time": 22.76
+        },
+        {
+          "gen": 2417,
+          "similarity": 99.271,
+          "time": 23.26
+        },
+        {
+          "gen": 2468,
+          "similarity": 99.271,
+          "time": 23.76
+        },
+        {
+          "gen": 2517,
+          "similarity": 99.272,
+          "time": 24.27
+        },
+        {
+          "gen": 2568,
+          "similarity": 99.272,
+          "time": 24.77
+        },
+        {
+          "gen": 2619,
+          "similarity": 99.272,
+          "time": 25.28
+        },
+        {
+          "gen": 2671,
+          "similarity": 99.273,
+          "time": 25.78
+        },
+        {
+          "gen": 2722,
+          "similarity": 99.273,
+          "time": 26.28
+        },
+        {
+          "gen": 2773,
+          "similarity": 99.275,
+          "time": 26.79
+        },
+        {
+          "gen": 2826,
+          "similarity": 99.281,
+          "time": 27.3
+        },
+        {
+          "gen": 2877,
+          "similarity": 99.282,
+          "time": 27.8
+        },
+        {
+          "gen": 2928,
+          "similarity": 99.282,
+          "time": 28.3
+        },
+        {
+          "gen": 2979,
+          "similarity": 99.282,
+          "time": 28.81
+        },
+        {
+          "gen": 3030,
+          "similarity": 99.29,
+          "time": 29.32
+        },
+        {
+          "gen": 3082,
+          "similarity": 99.292,
+          "time": 29.82
+        }
+      ]
+    },
+    {
+      "label": "128px / 50pop / 100poly",
+      "config": {
+        "numVertices": 6,
+        "mutationRate": 0.03,
+        "tournamentSize": 5,
+        "label": "128px / 50pop / 100poly",
+        "workRes": 128,
+        "populationSize": 50,
+        "numPolygons": 100
+      },
+      "workSize": "128x85",
+      "generations": 1079,
+      "genPerSec": 35.9,
+      "similarity": 99.09,
+      "elapsedSec": 30,
+      "samples": [
+        {
+          "gen": 20,
+          "similarity": 98.954,
+          "time": 0.51
+        },
+        {
+          "gen": 40,
+          "similarity": 98.964,
+          "time": 1.04
+        },
+        {
+          "gen": 60,
+          "similarity": 98.994,
+          "time": 1.55
+        },
+        {
+          "gen": 80,
+          "similarity": 99.005,
+          "time": 2.07
+        },
+        {
+          "gen": 99,
+          "similarity": 99.009,
+          "time": 2.57
+        },
+        {
+          "gen": 118,
+          "similarity": 99.009,
+          "time": 3.07
+        },
+        {
+          "gen": 138,
+          "similarity": 99.009,
+          "time": 3.59
+        },
+        {
+          "gen": 158,
+          "similarity": 99.009,
+          "time": 4.11
+        },
+        {
+          "gen": 177,
+          "similarity": 99.009,
+          "time": 4.62
+        },
+        {
+          "gen": 197,
+          "similarity": 99.009,
+          "time": 5.13
+        },
+        {
+          "gen": 216,
+          "similarity": 99.01,
+          "time": 5.63
+        },
+        {
+          "gen": 235,
+          "similarity": 99.029,
+          "time": 6.13
+        },
+        {
+          "gen": 254,
+          "similarity": 99.029,
+          "time": 6.63
+        },
+        {
+          "gen": 273,
+          "similarity": 99.032,
+          "time": 7.14
+        },
+        {
+          "gen": 292,
+          "similarity": 99.034,
+          "time": 7.66
+        },
+        {
+          "gen": 311,
+          "similarity": 99.041,
+          "time": 8.18
+        },
+        {
+          "gen": 330,
+          "similarity": 99.041,
+          "time": 8.69
+        },
+        {
+          "gen": 349,
+          "similarity": 99.041,
+          "time": 9.21
+        },
+        {
+          "gen": 368,
+          "similarity": 99.041,
+          "time": 9.73
+        },
+        {
+          "gen": 387,
+          "similarity": 99.043,
+          "time": 10.25
+        },
+        {
+          "gen": 405,
+          "similarity": 99.043,
+          "time": 10.75
+        },
+        {
+          "gen": 423,
+          "similarity": 99.043,
+          "time": 11.25
+        },
+        {
+          "gen": 442,
+          "similarity": 99.044,
+          "time": 11.78
+        },
+        {
+          "gen": 460,
+          "similarity": 99.044,
+          "time": 12.29
+        },
+        {
+          "gen": 478,
+          "similarity": 99.044,
+          "time": 12.81
+        },
+        {
+          "gen": 496,
+          "similarity": 99.044,
+          "time": 13.31
+        },
+        {
+          "gen": 514,
+          "similarity": 99.044,
+          "time": 13.82
+        },
+        {
+          "gen": 533,
+          "similarity": 99.063,
+          "time": 14.36
+        },
+        {
+          "gen": 552,
+          "similarity": 99.064,
+          "time": 14.88
+        },
+        {
+          "gen": 570,
+          "similarity": 99.068,
+          "time": 15.4
+        },
+        {
+          "gen": 589,
+          "similarity": 99.068,
+          "time": 15.93
+        },
+        {
+          "gen": 607,
+          "similarity": 99.068,
+          "time": 16.44
+        },
+        {
+          "gen": 625,
+          "similarity": 99.068,
+          "time": 16.95
+        },
+        {
+          "gen": 644,
+          "similarity": 99.068,
+          "time": 17.47
+        },
+        {
+          "gen": 662,
+          "similarity": 99.068,
+          "time": 17.99
+        },
+        {
+          "gen": 680,
+          "similarity": 99.07,
+          "time": 18.51
+        },
+        {
+          "gen": 698,
+          "similarity": 99.07,
+          "time": 19.01
+        },
+        {
+          "gen": 716,
+          "similarity": 99.07,
+          "time": 19.52
+        },
+        {
+          "gen": 734,
+          "similarity": 99.07,
+          "time": 20.03
+        },
+        {
+          "gen": 752,
+          "similarity": 99.07,
+          "time": 20.54
+        },
+        {
+          "gen": 770,
+          "similarity": 99.07,
+          "time": 21.04
+        },
+        {
+          "gen": 788,
+          "similarity": 99.07,
+          "time": 21.56
+        },
+        {
+          "gen": 806,
+          "similarity": 99.07,
+          "time": 22.06
+        },
+        {
+          "gen": 824,
+          "similarity": 99.07,
+          "time": 22.57
+        },
+        {
+          "gen": 842,
+          "similarity": 99.07,
+          "time": 23.09
+        },
+        {
+          "gen": 861,
+          "similarity": 99.07,
+          "time": 23.61
+        },
+        {
+          "gen": 879,
+          "similarity": 99.071,
+          "time": 24.13
+        },
+        {
+          "gen": 897,
+          "similarity": 99.071,
+          "time": 24.65
+        },
+        {
+          "gen": 915,
+          "similarity": 99.071,
+          "time": 25.15
+        },
+        {
+          "gen": 933,
+          "similarity": 99.071,
+          "time": 25.67
+        },
+        {
+          "gen": 951,
+          "similarity": 99.071,
+          "time": 26.17
+        },
+        {
+          "gen": 969,
+          "similarity": 99.074,
+          "time": 26.69
+        },
+        {
+          "gen": 985,
+          "similarity": 99.076,
+          "time": 27.19
+        },
+        {
+          "gen": 1002,
+          "similarity": 99.076,
+          "time": 27.7
+        },
+        {
+          "gen": 1018,
+          "similarity": 99.078,
+          "time": 28.2
+        },
+        {
+          "gen": 1035,
+          "similarity": 99.078,
+          "time": 28.71
+        },
+        {
+          "gen": 1053,
+          "similarity": 99.078,
+          "time": 29.22
+        },
+        {
+          "gen": 1070,
+          "similarity": 99.08,
+          "time": 29.76
+        }
+      ]
+    },
+    {
+      "label": "128px / 50pop / 200poly",
+      "config": {
+        "numVertices": 6,
+        "mutationRate": 0.03,
+        "tournamentSize": 5,
+        "label": "128px / 50pop / 200poly",
+        "workRes": 128,
+        "populationSize": 50,
+        "numPolygons": 200
+      },
+      "workSize": "128x85",
+      "generations": 560,
+      "genPerSec": 18.7,
+      "similarity": 99.12,
+      "elapsedSec": 30,
+      "samples": [
+        {
+          "gen": 11,
+          "similarity": 98.87,
+          "time": 0.62
+        },
+        {
+          "gen": 22,
+          "similarity": 98.897,
+          "time": 1.14
+        },
+        {
+          "gen": 33,
+          "similarity": 98.913,
+          "time": 1.64
+        },
+        {
+          "gen": 44,
+          "similarity": 98.931,
+          "time": 2.17
+        },
+        {
+          "gen": 55,
+          "similarity": 98.94,
+          "time": 2.71
+        },
+        {
+          "gen": 66,
+          "similarity": 98.959,
+          "time": 3.25
+        },
+        {
+          "gen": 77,
+          "similarity": 98.959,
+          "time": 3.78
+        },
+        {
+          "gen": 87,
+          "similarity": 98.959,
+          "time": 4.29
+        },
+        {
+          "gen": 97,
+          "similarity": 98.959,
+          "time": 4.82
+        },
+        {
+          "gen": 107,
+          "similarity": 98.978,
+          "time": 5.32
+        },
+        {
+          "gen": 117,
+          "similarity": 98.978,
+          "time": 5.83
+        },
+        {
+          "gen": 127,
+          "similarity": 98.978,
+          "time": 6.34
+        },
+        {
+          "gen": 137,
+          "similarity": 98.988,
+          "time": 6.85
+        },
+        {
+          "gen": 147,
+          "similarity": 98.999,
+          "time": 7.37
+        },
+        {
+          "gen": 157,
+          "similarity": 98.999,
+          "time": 7.89
+        },
+        {
+          "gen": 167,
+          "similarity": 99.002,
+          "time": 8.41
+        },
+        {
+          "gen": 177,
+          "similarity": 99.002,
+          "time": 8.92
+        },
+        {
+          "gen": 187,
+          "similarity": 99.007,
+          "time": 9.45
+        },
+        {
+          "gen": 197,
+          "similarity": 99.008,
+          "time": 9.98
+        },
+        {
+          "gen": 207,
+          "similarity": 99.01,
+          "time": 10.49
+        },
+        {
+          "gen": 217,
+          "similarity": 99.017,
+          "time": 11.02
+        },
+        {
+          "gen": 227,
+          "similarity": 99.02,
+          "time": 11.55
+        },
+        {
+          "gen": 237,
+          "similarity": 99.03,
+          "time": 12.09
+        },
+        {
+          "gen": 247,
+          "similarity": 99.03,
+          "time": 12.63
+        },
+        {
+          "gen": 257,
+          "similarity": 99.051,
+          "time": 13.18
+        },
+        {
+          "gen": 266,
+          "similarity": 99.051,
+          "time": 13.69
+        },
+        {
+          "gen": 276,
+          "similarity": 99.051,
+          "time": 14.22
+        },
+        {
+          "gen": 286,
+          "similarity": 99.052,
+          "time": 14.77
+        },
+        {
+          "gen": 296,
+          "similarity": 99.056,
+          "time": 15.32
+        },
+        {
+          "gen": 306,
+          "similarity": 99.056,
+          "time": 15.84
+        },
+        {
+          "gen": 316,
+          "similarity": 99.066,
+          "time": 16.38
+        },
+        {
+          "gen": 326,
+          "similarity": 99.066,
+          "time": 16.93
+        },
+        {
+          "gen": 335,
+          "similarity": 99.073,
+          "time": 17.43
+        },
+        {
+          "gen": 345,
+          "similarity": 99.073,
+          "time": 17.96
+        },
+        {
+          "gen": 355,
+          "similarity": 99.073,
+          "time": 18.51
+        },
+        {
+          "gen": 365,
+          "similarity": 99.073,
+          "time": 19.06
+        },
+        {
+          "gen": 375,
+          "similarity": 99.073,
+          "time": 19.59
+        },
+        {
+          "gen": 384,
+          "similarity": 99.073,
+          "time": 20.09
+        },
+        {
+          "gen": 393,
+          "similarity": 99.081,
+          "time": 20.59
+        },
+        {
+          "gen": 403,
+          "similarity": 99.081,
+          "time": 21.13
+        },
+        {
+          "gen": 412,
+          "similarity": 99.081,
+          "time": 21.65
+        },
+        {
+          "gen": 421,
+          "similarity": 99.081,
+          "time": 22.17
+        },
+        {
+          "gen": 430,
+          "similarity": 99.081,
+          "time": 22.7
+        },
+        {
+          "gen": 440,
+          "similarity": 99.081,
+          "time": 23.24
+        },
+        {
+          "gen": 450,
+          "similarity": 99.081,
+          "time": 23.79
+        },
+        {
+          "gen": 460,
+          "similarity": 99.084,
+          "time": 24.34
+        },
+        {
+          "gen": 470,
+          "similarity": 99.084,
+          "time": 24.89
+        },
+        {
+          "gen": 479,
+          "similarity": 99.09,
+          "time": 25.4
+        },
+        {
+          "gen": 488,
+          "similarity": 99.09,
+          "time": 25.9
+        },
+        {
+          "gen": 498,
+          "similarity": 99.098,
+          "time": 26.45
+        },
+        {
+          "gen": 507,
+          "similarity": 99.098,
+          "time": 26.96
+        },
+        {
+          "gen": 516,
+          "similarity": 99.125,
+          "time": 27.49
+        },
+        {
+          "gen": 525,
+          "similarity": 99.125,
+          "time": 28
+        },
+        {
+          "gen": 534,
+          "similarity": 99.125,
+          "time": 28.52
+        },
+        {
+          "gen": 543,
+          "similarity": 99.125,
+          "time": 29.04
+        },
+        {
+          "gen": 552,
+          "similarity": 99.125,
+          "time": 29.55
+        }
+      ]
+    }
+  ]
+}
