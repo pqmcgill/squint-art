@@ -24,6 +24,7 @@ const genCountEl = document.getElementById("gen-count");
 const similarityEl = document.getElementById("similarity-value");
 const gpsEl = document.getElementById("gens-per-sec");
 const islandsEl = document.getElementById("islands-value");
+const canvasPlayBtn = document.getElementById("canvas-play-btn");
 const chartCanvas = document.getElementById("chart-canvas");
 const migrationCanvas = document.getElementById("migration-canvas");
 
@@ -32,7 +33,9 @@ const gifModalInfo = document.getElementById("gif-modal-info");
 const gifConfirmBtn = document.getElementById("gif-confirm");
 const gifCancelBtn = document.getElementById("gif-cancel");
 const gifProgress = document.getElementById("gif-progress");
-const gifProgressText = document.getElementById("gif-progress-text");
+const gifProgressFrame = document.getElementById("gif-progress-frame");
+const gifProgressEta = document.getElementById("gif-progress-eta");
+const gifProgressPct = document.getElementById("gif-progress-pct");
 const gifProgressFill = document.getElementById("gif-progress-fill");
 const gifCancelRunBtn = document.getElementById("gif-cancel-btn");
 
@@ -46,9 +49,16 @@ const gifProcessor = new GifProcessor();
 const refPlayer = new GifPlayer(referenceCanvas);
 const outPlayer = new GifPlayer(outputCanvas);
 
+const monitorPanel = document.getElementById("monitor-panel");
+
 let referenceImage = null;
 let isGifMode = false;
 let startTime = 0;
+
+// Short-circuit: skip chart/viz work when panel is collapsed
+function isMonitorOpen() {
+  return monitorPanel.open;
+}
 
 // ---- Helpers ----
 
@@ -111,14 +121,17 @@ function updateStats() {
 
   if (islands.globalBest) {
     similarityEl.textContent = `${islands.globalBest.similarity}%`;
-    benchData.record(totalGens, islands.globalBest.similarity);
-    chart.scheduleDraw();
+
+    // Only record + render chart/viz when the panel is open
+    if (isMonitorOpen()) {
+      benchData.record(totalGens, islands.globalBest.similarity);
+      chart.scheduleDraw();
+      migViz.draw();
+    }
   }
 
   const elapsed = (Date.now() - startTime) / 1000;
   if (elapsed > 0) gpsEl.textContent = Math.round(totalGens / elapsed);
-
-  migViz.draw();
 }
 
 // ---- Drop Zone ----
@@ -184,6 +197,8 @@ function setupWorkspace(img) {
     chart.resize();
     migViz.resize();
   });
+  canvasPlayBtn.classList.remove("hidden");
+  showControls(startBtn, newImageBtn);
   resetStats();
 }
 
@@ -215,23 +230,35 @@ function startIslands() {
 
 // ---- Controls ----
 
-startBtn.addEventListener("click", () => {
+// Show only the buttons relevant to the current state.
+// States: idle (image loaded, not started), running, stopped (has output)
+const allBtns = [startBtn, stopBtn, resetBtn, downloadBtn, newImageBtn];
+
+function showControls(...btns) {
+  for (const b of allBtns) {
+    b.classList.toggle("hidden", !btns.includes(b));
+    b.disabled = false;
+  }
+}
+
+function triggerStart() {
   if (isGifMode) {
     gifModalInfo.textContent = `${gifProcessor.frames.length} frames at ${gifProcessor.width}x${gifProcessor.height}. This will run the GA on each frame sequentially.`;
     gifModal.classList.remove("hidden");
     return;
   }
+  canvasPlayBtn.classList.add("hidden");
   startIslands();
-  startBtn.disabled = true;
-  stopBtn.disabled = false;
-});
+  showControls(stopBtn);
+}
+
+startBtn.addEventListener("click", triggerStart);
+canvasPlayBtn.addEventListener("click", triggerStart);
 
 stopBtn.addEventListener("click", () => {
   islands.kill();
   benchData.stopRun();
-  startBtn.disabled = false;
-  stopBtn.disabled = true;
-  downloadBtn.disabled = !islands.globalBest;
+  showControls(startBtn, resetBtn, downloadBtn, newImageBtn);
 });
 
 resetBtn.addEventListener("click", () => {
@@ -239,12 +266,11 @@ resetBtn.addEventListener("click", () => {
   benchData.stopRun();
   refPlayer.stop();
   outPlayer.stop();
-  startBtn.disabled = false;
-  stopBtn.disabled = true;
-  downloadBtn.disabled = true;
   outputCanvas
     .getContext("2d")
     .clearRect(0, 0, outputCanvas.width, outputCanvas.height);
+  canvasPlayBtn.classList.remove("hidden");
+  showControls(startBtn, newImageBtn);
   resetStats();
 });
 
@@ -254,12 +280,10 @@ newImageBtn.addEventListener("click", () => {
   refPlayer.stop();
   outPlayer.stop();
   gifProcessor.cancel();
-  startBtn.disabled = false;
-  stopBtn.disabled = true;
-  downloadBtn.disabled = true;
   isGifMode = false;
   workspace.classList.add("hidden");
   gifProgress.classList.add("hidden");
+  document.getElementById("controls-buttons").classList.remove("hidden");
   dropZone.classList.remove("hidden");
   fileInput.value = "";
   referenceImage = null;
@@ -304,6 +328,8 @@ async function handleGif(file) {
     chart.resize();
     migViz.resize();
   });
+  canvasPlayBtn.classList.remove("hidden");
+  showControls(startBtn, newImageBtn);
   resetStats();
 }
 
@@ -319,11 +345,13 @@ gifCancelBtn.addEventListener("click", () => {
 gifCancelRunBtn.addEventListener("click", () => {
   gifProcessor.cancel();
   gifProgress.classList.add("hidden");
-  startBtn.disabled = false;
+  document.getElementById("controls-buttons").classList.remove("hidden");
+  showControls(startBtn, newImageBtn);
   refPlayer.play();
 });
 
 async function startGifProcessing() {
+  canvasPlayBtn.classList.add("hidden");
   const config = getConfig();
   config.generationsPerFrame = parseInt(
     document.getElementById("gif-gens").value,
@@ -335,16 +363,31 @@ async function startGifProcessing() {
   refPlayer.stop();
   outPlayer.stop();
 
-  startBtn.disabled = true;
-  stopBtn.disabled = true;
-  downloadBtn.disabled = true;
+  document.getElementById("controls-buttons").classList.add("hidden");
   gifProgress.classList.remove("hidden");
   gifProgressFill.style.width = "0%";
-  gifProgressText.textContent = `Processing frame 0/${gifProcessor.frames.length}...`;
+  gifProgressFrame.textContent = `Generating frame 0 / ${gifProcessor.frames.length}`;
+  gifProgressEta.textContent = "";
+  gifProgressPct.textContent = "";
+
+  const gifStartTime = Date.now();
 
   gifProcessor.onProgress = (frameIdx, total, polygons) => {
-    gifProgressText.textContent = `Processing frame ${frameIdx}/${total}...`;
-    gifProgressFill.style.width = `${(frameIdx / total) * 100}%`;
+    const pct = Math.round((frameIdx / total) * 100);
+    gifProgressFrame.textContent = `Generating frame ${frameIdx} / ${total}`;
+    gifProgressFill.style.width = `${pct}%`;
+    gifProgressPct.textContent = `${pct}%`;
+
+    // ETA
+    const elapsed = (Date.now() - gifStartTime) / 1000;
+    const perFrame = elapsed / frameIdx;
+    const remaining = Math.round(perFrame * (total - frameIdx));
+    if (remaining > 60) {
+      gifProgressEta.textContent = `~${Math.round(remaining / 60)}m left`;
+    } else {
+      gifProgressEta.textContent = `~${remaining}s left`;
+    }
+
     render(polygons);
 
     const frame = gifProcessor.frames[frameIdx - 1];
@@ -365,7 +408,8 @@ async function startGifProcessing() {
 
   gifProcessor.onComplete = (blob) => {
     gifProgress.classList.add("hidden");
-    startBtn.disabled = false;
+    document.getElementById("controls-buttons").classList.remove("hidden");
+    showControls(startBtn, downloadBtn, newImageBtn);
 
     const refFrames = gifProcessor.frames.map((f) => ({
       source: f.imageData,
@@ -427,8 +471,20 @@ document.getElementById("clear-chart-btn").addEventListener("click", () => {
 });
 
 window.addEventListener("resize", () => {
-  chart.resize();
-  migViz.resize();
+  if (isMonitorOpen()) {
+    chart.resize();
+    migViz.resize();
+  }
+});
+
+// Resize chart/viz when the monitor panel opens
+monitorPanel.addEventListener("toggle", () => {
+  if (monitorPanel.open) {
+    requestAnimationFrame(() => {
+      chart.resize();
+      migViz.resize();
+    });
+  }
 });
 
 // ---- Battery saver: pause workers when tab is hidden ----

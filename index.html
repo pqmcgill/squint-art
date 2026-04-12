@@ -24,29 +24,38 @@
     <input type="file" id="file-input" accept="image/*,image/gif" hidden>
     <div id="drop-zone" class="drop-zone">
       <div class="drop-zone-content">
-        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
              stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
           <polyline points="17 8 12 3 7 8"/>
           <line x1="12" y1="3" x2="12" y2="15"/>
         </svg>
-        <p>Drop a reference image here</p>
-        <p class="hint">or click to select a file</p>
+        <p>Drop an image or GIF here</p>
+        <p class="hint">or tap to select</p>
       </div>
     </div>
 
     <div id="workspace" class="workspace hidden">
+      <!-- Output first (more interesting on mobile), reference second -->
       <div class="canvases">
-        <div class="canvas-container">
+        <div class="canvas-container output-container">
+          <h3 id="best-label">Best Individual</h3>
+          <div class="canvas-wrapper">
+            <canvas id="output-canvas"></canvas>
+            <button id="canvas-play-btn" class="canvas-play-btn" aria-label="Start">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="canvas-container ref-container">
           <h3>Reference</h3>
           <canvas id="reference-canvas"></canvas>
         </div>
-        <div class="canvas-container">
-          <h3 id="best-label">Best Individual</h3>
-          <canvas id="output-canvas"></canvas>
-        </div>
       </div>
 
+      <!-- Stats: generation + similarity always visible; gen/s + islands are power-user -->
       <div class="stats">
         <div class="stat">
           <span class="stat-label">Generation</span>
@@ -60,18 +69,35 @@
           <span class="stat-label">Gen/s</span>
           <strong id="gens-per-sec">&mdash;</strong>
         </div>
-        <div class="stat">
+        <div class="stat stat-detail" title="Independent populations evolving in parallel across your CPU cores. They periodically share their best individuals to combine diversity with speed.">
           <span class="stat-label">Islands</span>
           <strong id="islands-value">&mdash;</strong>
         </div>
       </div>
 
-      <div class="controls">
-        <button id="start-btn" class="btn btn-primary">Start</button>
-        <button id="stop-btn" class="btn" disabled>Stop</button>
-        <button id="reset-btn" class="btn">Reset</button>
-        <button id="download-btn" class="btn" disabled>Download</button>
-        <button id="new-image-btn" class="btn">New Image</button>
+      <!-- Controls: sticky on mobile. Progress replaces buttons during GIF processing. -->
+      <div class="controls" id="controls">
+        <div id="controls-buttons">
+          <button id="start-btn" class="btn btn-primary">Start</button>
+          <button id="stop-btn" class="btn" disabled>Stop</button>
+          <button id="reset-btn" class="btn">Reset</button>
+          <button id="download-btn" class="btn" disabled>Download</button>
+          <button id="new-image-btn" class="btn">New Image</button>
+        </div>
+        <div id="gif-progress" class="gif-progress hidden">
+          <div class="gif-progress-top">
+            <strong id="gif-progress-frame">0 / 0</strong>
+            <span class="gif-progress-meta">
+              <span id="gif-progress-eta"></span>
+              <button id="gif-cancel-btn" class="btn btn-sm">Cancel</button>
+            </span>
+          </div>
+          <div class="gif-progress-bar">
+            <div id="gif-progress-fill" class="gif-progress-fill">
+              <span id="gif-progress-pct"></span>
+            </div>
+          </div>
+        </div>
       </div>
 
       <details class="settings">
@@ -89,27 +115,27 @@
             Vertices per Polygon
             <input type="number" id="num-vertices" value="6" min="3" max="10">
           </label>
-          <label>
+          <label title="Per-gene probability of mutation. Higher = more exploration, lower = fine-tuning. Adapts automatically during the run.">
             Mutation Rate
             <input type="number" id="mutation-rate" value="0.03" min="0.001" max="0.5" step="0.001">
           </label>
-          <label>
+          <label title="How many random candidates compete for parent selection. Higher = greedier, converges faster but less diversity.">
             Tournament Size
             <input type="number" id="tournament-size" value="5" min="2" max="20">
           </label>
-          <label>
+          <label title="Resolution for the reference image and display. Higher captures more detail but runs slower.">
             Work Resolution (px)
             <input type="number" id="work-res" value="128" min="32" max="512" step="16">
           </label>
-          <label>
+          <label title="Fitness evaluation runs at this fraction of the work resolution. 2 = half size per axis (4x faster). No quality loss.">
             Fitness Downscale (1 = full)
             <input type="number" id="fit-div" value="2" min="1" max="8" step="1">
           </label>
-          <label>
+          <label title="Compare every Nth pixel during fitness evaluation. Minimal impact since rendering dominates.">
             Subsample (1 = all pixels)
             <input type="number" id="sub-sample" value="1" min="1" max="16" step="1">
           </label>
-          <label>
+          <label title="How islands exchange genetic material. Ring: 2 neighbors, slow diffusion, more diversity. Star: all connected, fast spread. Grid: 2D neighborhood.">
             Migration Topology
             <select id="topology">
               <option value="ring" selected>Ring</option>
@@ -117,11 +143,11 @@
               <option value="star">Star</option>
             </select>
           </label>
-          <label>
+          <label title="How many GA generations to run per GIF frame. More = better quality per frame, slower overall.">
             GIF: Generations/Frame
             <input type="number" id="gif-gens" value="500" min="50" max="10000" step="50">
           </label>
-          <label>
+          <label title="Seed each frame's population from the previous frame's best. Gives temporal coherence so frames don't flicker.">
             GIF: Warm Start
             <select id="gif-warm">
               <option value="1" selected>On</option>
@@ -143,39 +169,32 @@
         </div>
       </div>
 
-      <!-- GIF progress bar -->
-      <div id="gif-progress" class="gif-progress hidden">
-        <div class="gif-progress-label">
-          <span id="gif-progress-text">Processing frame 0/0...</span>
-          <button id="gif-cancel-btn" class="btn btn-sm">Cancel</button>
-        </div>
-        <div class="gif-progress-bar">
-          <div id="gif-progress-fill" class="gif-progress-fill"></div>
-        </div>
-      </div>
 
-      <div class="monitor-row">
-        <div class="chart-section">
-          <div class="chart-header">
-            <h3>Performance</h3>
-            <div class="chart-actions">
-              <div class="axis-toggle">
-                <button class="toggle-btn active" data-axis="generation">Generation</button>
-                <button class="toggle-btn" data-axis="time">Time</button>
+      <!-- Performance charts: collapsed by default, skip rendering when closed -->
+      <details class="monitor-panel" id="monitor-panel" title="Similarity over time and island migration visualization. Collapsed to save CPU cycles.">
+        <summary>Performance</summary>
+        <div class="monitor-row">
+          <div class="chart-section">
+            <div class="chart-header">
+              <div class="chart-actions">
+                <div class="axis-toggle">
+                  <button class="toggle-btn active" data-axis="generation">Generation</button>
+                  <button class="toggle-btn" data-axis="time">Time</button>
+                </div>
+                <button class="btn btn-sm" id="export-btn">Export JSON</button>
+                <button class="btn btn-sm" id="clear-chart-btn">Clear</button>
               </div>
-              <button class="btn btn-sm" id="export-btn">Export JSON</button>
-              <button class="btn btn-sm" id="clear-chart-btn">Clear</button>
             </div>
+            <canvas id="chart-canvas"></canvas>
           </div>
-          <canvas id="chart-canvas"></canvas>
-        </div>
-        <div class="viz-section">
-          <div class="chart-header">
-            <h3>Islands</h3>
+          <div class="viz-section">
+            <div class="chart-header">
+              <h3>Islands</h3>
+            </div>
+            <canvas id="migration-canvas"></canvas>
           </div>
-          <canvas id="migration-canvas"></canvas>
         </div>
-      </div>
+      </details>
     </div>
   </div>
 
