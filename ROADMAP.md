@@ -20,7 +20,7 @@
 
 ## Optimizations
 
-- [ ] WebGL rendering for fitness evaluation — move polygon rasterization to the GPU, eliminating the Canvas 2D bottleneck that dominates all current profiling
+- [x] ~~WebGL/WebGPU rendering for fitness evaluation~~ — **Investigated and rejected.** Tested WebGL2 (render-only + CPU diff, full GPU pipeline) and WebGPU (batched render + compute shader diff + async readback). All three approaches were slower than Canvas 2D (30-200 gen/s vs 1000 gen/s) because: (1) `readPixels`/`mapAsync` forces a GPU pipeline sync that costs ~7-42ms per call regardless of data size, and (2) at fitness resolution (64x43px), GPU driver overhead per render pass dominates actual computation. Canvas 2D's software rasterizer avoids GPU sync entirely and is highly optimized for small canvases.
 - [ ] Delta evaluation — when mutating a single polygon, only re-render and compare its bounding box instead of the full canvas. Requires a hill-climbing variant rather than generational GA, but the speedup per evaluation is massive
 - [ ] Adaptive mutation rate — decrease mutation rate as fitness plateaus to fine-tune, increase when stuck to escape local optima
 - [ ] Adaptive fitness resolution — start at fd4 for fast early convergence, ramp to fd1 as improvement slows. Data-driven progressive resolution based on actual fitness delta per generation
