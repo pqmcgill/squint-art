@@ -80,9 +80,10 @@ function getWorkImageData() {
   const tmp = document.createElement("canvas");
   tmp.width = w;
   tmp.height = h;
-  tmp.getContext("2d").drawImage(img, 0, 0, w, h);
+  const tctx = tmp.getContext("2d", { willReadFrequently: true });
+  tctx.drawImage(img, 0, 0, w, h);
   return {
-    data: tmp.getContext("2d").getImageData(0, 0, w, h).data,
+    data: tctx.getImageData(0, 0, w, h).data,
     width: w,
     height: h,
   };

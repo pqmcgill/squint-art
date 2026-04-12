@@ -66,10 +66,14 @@ export function createIndividual(numPolygons, numVertices) {
   return { polygons };
 }
 
+// Single-point crossover: preserves polygon ordering from each parent.
+// Cut at a random point — first half from p1, second half from p2.
 export function crossover(p1, p2) {
+  const n = p1.polygons.length;
+  const cut = Math.floor(Math.random() * (n - 1)) + 1;
   const child = { polygons: [] };
-  for (let i = 0; i < p1.polygons.length; i++) {
-    const src = Math.random() < 0.5 ? p1 : p2;
+  for (let i = 0; i < n; i++) {
+    const src = i < cut ? p1 : p2;
     child.polygons.push(clonePolygon(src.polygons[i]));
   }
   return child;
