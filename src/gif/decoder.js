@@ -14,7 +14,7 @@ export function decodeGif(arrayBuffer) {
   const compCanvas = document.createElement("canvas");
   compCanvas.width = w;
   compCanvas.height = h;
-  const compCtx = compCanvas.getContext("2d");
+  const compCtx = compCanvas.getContext("2d", { willReadFrequently: true });
 
   const frames = [];
   for (const frame of rawFrames) {

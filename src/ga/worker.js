@@ -1,6 +1,7 @@
 // GA Web Worker — runs the evolution loop off the main thread.
 // Bundled separately by bun as its own entry point.
 
+import { createAdaptiveMutation } from "./adaptive-mutation.js";
 import { diffToSimilarity, pixelDiffJS } from "./fitness.js";
 import {
   cloneIndividual,
@@ -213,20 +214,29 @@ function runGeneration() {
     const p1 = tournamentSelect(population, fitnesses, config.tournamentSize);
     const p2 = tournamentSelect(population, fitnesses, config.tournamentSize);
     const child = crossover(p1, p2);
-    mutate(child, config.mutationRate, config.numVertices);
+    mutate(child, adaptiveMutation.rate, config.numVertices);
     next.push(child);
   }
 
   population = next;
 }
 
+// --- Adaptive Mutation ---
+
+let adaptiveMutation = null;
+
+// --- GA Loop ---
+
 async function runGA() {
   const maxGens = config.maxGenerations || 0;
   let lastUpdate = Date.now();
 
+  adaptiveMutation = createAdaptiveMutation(config.mutationRate);
+
   while (running) {
     runGeneration();
     generation++;
+    adaptiveMutation.update(bestFitness);
 
     if (maxGens > 0 && generation >= maxGens) {
       const similarity = diffToSimilarity(fullDiff(), width, height);

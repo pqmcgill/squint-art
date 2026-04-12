@@ -280,6 +280,19 @@ Star is fastest in raw throughput but its aggressive broadcasting causes early c
 
 **Learning:** Migration topology is a quality-of-convergence lever, not a throughput lever. Star maximizes speed of spreading the current best; ring maximizes the probability of *finding* a better solution by maintaining population diversity across islands. For short runs, star wins. For longer runs where escaping local optima matters, ring is the better default.
 
+### Phase 7: Convergence Quality Improvements
+
+**Hill climbing / hybrid (investigated, rejected):**
+Tested pure hill climbing (mutate one polygon, accept if better) and a hybrid mode (generational GA auto-switching to hill climbing when improvement stalls). Hill climbing was faster in throughput but plateaued at ~96% similarity — it gets trapped in local optima without population diversity to escape. The generational GA's crossover and tournament selection are essential for continued improvement beyond early convergence.
+
+**Single-point crossover:**
+Replaced uniform crossover (each polygon slot randomly from either parent) with single-point crossover (first N polygons from parent 1, rest from parent 2). This preserves polygon drawing order — important because layered transparent polygons create visual effects that depend on their sequence. Mirrors biological chromosome crossover during meiosis.
+
+**Adaptive mutation rate:**
+Mutation rate now oscillates between 0.005 (fine-tuning) and 0.15 (aggressive exploration) based on a 50-generation sliding window. When fitness improves, the rate cools (×0.9). When it stalls, it heats (×1.5). This breaks through plateaus that fixed-rate mutation gets stuck on — analogous to stress-induced mutagenesis in biology.
+
+**Learning:** Throughput optimizations have diminishing returns once you're past the rendering bottleneck. At this stage, **convergence quality** matters more than raw speed. The GA's ability to escape local optima through population diversity, ordered crossover, and adaptive exploration is what determines the final image quality.
+
 ### Summary
 
 | Optimization | Gen/s | Cumulative vs Original |
@@ -290,4 +303,4 @@ Star is fastest in raw throughput but its aggressive broadcasting causes early c
 | + Reduced-res fitness (fd2) | 98.8 | **2.3x** |
 | + Island model (9 threads) | 497.9 | **11.4x** |
 
-The key takeaway: **profile before optimizing**. The JS diff loop seemed like the obvious target, but canvas rendering dominated. Wasm helped at the margin. The real wins came from reducing total work (lower-res fitness) and parallelism (island model) — architectural changes, not micro-optimizations.
+The key takeaway: **profile before optimizing**. The JS diff loop seemed like the obvious target, but canvas rendering dominated. Wasm helped at the margin. The real wins came from reducing total work (lower-res fitness) and parallelism (island model) — architectural changes, not micro-optimizations. Once throughput was solved, the focus shifted to convergence quality — adaptive mutation and single-point crossover to help the GA continue improving past early plateaus.

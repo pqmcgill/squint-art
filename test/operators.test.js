@@ -135,6 +135,42 @@ describe("crossover", () => {
     }
   });
 
+  test("single-point: first half from p1, second half from p2", () => {
+    const p1 = createIndividual(20, 4);
+    const p2 = createIndividual(20, 4);
+    p1.polygons.forEach((p) => {
+      p.r = 0;
+      polyFill(p);
+    });
+    p2.polygons.forEach((p) => {
+      p.r = 255;
+      polyFill(p);
+    });
+
+    // Run many crossovers and verify the cut structure
+    for (let trial = 0; trial < 50; trial++) {
+      const child = crossover(p1, p2);
+      // Find where the switch happens
+      let cutFound = -1;
+      for (let i = 1; i < child.polygons.length; i++) {
+        if (child.polygons[i].r !== child.polygons[i - 1].r) {
+          cutFound = i;
+          break;
+        }
+      }
+      // Either all from one parent, or exactly one cut point
+      if (cutFound !== -1) {
+        // Everything before cut is p1 (r=0), everything after is p2 (r=255)
+        for (let i = 0; i < cutFound; i++) {
+          expect(child.polygons[i].r).toBe(0);
+        }
+        for (let i = cutFound; i < child.polygons.length; i++) {
+          expect(child.polygons[i].r).toBe(255);
+        }
+      }
+    }
+  });
+
   test("child is independent of parents (deep copy)", () => {
     const p1 = createIndividual(5, 4);
     const p2 = createIndividual(5, 4);
