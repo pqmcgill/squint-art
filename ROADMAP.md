@@ -17,6 +17,10 @@
 ## Features
 
 - [ ] Background color picker — choose black, white, or custom background for the output canvas. Some images (especially those with light backgrounds) converge significantly faster on white than black
+- [ ] Export to SVG — the polygon representation is inherently vector. Export the best individual as an SVG file for infinite resolution, tiny file size, and embeddability anywhere. Nearly free since the polygon data already exists.
+- [ ] Timelapse export — record the evolution itself as a video, from random noise to recognizable image. Each frame is the best individual at that generation. The most visually compelling artifact the tool produces.
+- [ ] Video input/output with audio passthrough — same frame-by-frame pipeline as GIF mode but with MP4/WebM via the browser's VideoDecoder/VideoEncoder APIs. Higher resolution, longer duration, warm-start temporal coherence at 30fps, original audio preserved.
+- [ ] Audio visualization — feed in audio, map frequency bands to polygon parameters (bass → polygon size, treble → vertex count, midrange → color). The polygon art dances to the music.
 
 ## Optimizations
 
