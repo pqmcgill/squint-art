@@ -89,7 +89,7 @@ export class GifProcessor {
       outCanvas.width = this.width;
       outCanvas.height = this.height;
       const outCtx = outCanvas.getContext("2d");
-      outCtx.fillStyle = "#000";
+      outCtx.fillStyle = config.background || "#000";
       outCtx.fillRect(0, 0, this.width, this.height);
       for (const poly of result.polygons) {
         outCtx.beginPath();

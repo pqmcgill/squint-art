@@ -1,7 +1,7 @@
 // Render polygons to a canvas at its current size.
 
-export function renderPolygons(ctx, w, h, polygons) {
-  ctx.fillStyle = "#000";
+export function renderPolygons(ctx, w, h, polygons, background = "#000") {
+  ctx.fillStyle = background;
   ctx.fillRect(0, 0, w, h);
 
   for (const poly of polygons) {

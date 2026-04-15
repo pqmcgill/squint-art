@@ -125,7 +125,7 @@ class GA {
   }
 
   _renderTo(ind, c, w, h) {
-    c.fillStyle = "#000";
+    c.fillStyle = this.cfg.background || "#000";
     c.fillRect(0, 0, w, h);
     for (const poly of ind.polygons) {
       c.beginPath();
