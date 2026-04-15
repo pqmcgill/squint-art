@@ -1,5 +1,6 @@
 // App controller — all DOM wiring. Imports everything, owns nothing.
 
+import { detectBackgroundColor } from "./background.js";
 import { BenchmarkData } from "./chart/data.js";
 import { MigrationViz } from "./chart/migration-viz.js";
 import { ChartRenderer } from "./chart/renderer.js";
@@ -50,10 +51,24 @@ const refPlayer = new GifPlayer(referenceCanvas);
 const outPlayer = new GifPlayer(outputCanvas);
 
 const monitorPanel = document.getElementById("monitor-panel");
+const bgColorInput = document.getElementById("bg-color");
+const bgAutoSelect = document.getElementById("bg-auto");
+
+const BG_AUTO_KEY = "squint-art.bg-auto";
+
+// Restore auto-detect preference from previous session
+const storedAuto = localStorage.getItem(BG_AUTO_KEY);
+if (storedAuto !== null) bgAutoSelect.value = storedAuto;
+bgAutoSelect.addEventListener("change", () => {
+  localStorage.setItem(BG_AUTO_KEY, bgAutoSelect.value);
+});
 
 let referenceImage = null;
 let isGifMode = false;
 let startTime = 0;
+// Background captured at run start — keeps display stable if user changes the
+// picker mid-run (the new value will only apply on the next Start).
+let activeBackground = "#000000";
 
 // Short-circuit: skip chart/viz work when panel is collapsed
 function isMonitorOpen() {
@@ -74,6 +89,7 @@ function getConfig() {
     ),
     fitDiv: parseInt(document.getElementById("fit-div").value, 10),
     subSample: parseInt(document.getElementById("sub-sample").value, 10),
+    background: bgColorInput.value,
   };
 }
 
@@ -105,6 +121,7 @@ function render(polygons) {
     outputCanvas.width,
     outputCanvas.height,
     polygons,
+    activeBackground,
   );
 }
 
@@ -188,7 +205,13 @@ function setupWorkspace(img) {
   referenceCanvas.height = dh;
   outputCanvas.width = dw;
   outputCanvas.height = dh;
-  referenceCanvas.getContext("2d").drawImage(img, 0, 0, dw, dh);
+  const refCtx = referenceCanvas.getContext("2d");
+  refCtx.drawImage(img, 0, 0, dw, dh);
+
+  if (bgAutoSelect.value === "1") {
+    const refData = refCtx.getImageData(0, 0, dw, dh).data;
+    bgColorInput.value = detectBackgroundColor(refData, dw, dh);
+  }
 
   dropZone.classList.add("hidden");
   workspace.classList.remove("hidden");
@@ -219,6 +242,8 @@ function startIslands() {
   const config = getConfig();
   const numIslands = getDefaultIslandCount();
   const topology = getTopology();
+
+  activeBackground = config.background;
 
   benchData.startRun({ ...config, islands: numIslands, topology });
   migViz.reset(topology, numIslands);
@@ -320,6 +345,15 @@ async function handleGif(file) {
   refPlayer.setFrames(refFrames, dw, dh);
   refPlayer.play();
 
+  if (bgAutoSelect.value === "1" && gifProcessor.frames.length > 0) {
+    const frame0 = gifProcessor.frames[0].imageData;
+    bgColorInput.value = detectBackgroundColor(
+      frame0.data,
+      frame0.width,
+      frame0.height,
+    );
+  }
+
   dropZone.classList.add("hidden");
   workspace.classList.remove("hidden");
   isGifMode = true;
@@ -359,6 +393,8 @@ async function startGifProcessing() {
   );
   config.warmStart = document.getElementById("gif-warm").value === "1";
   config.workRes = parseInt(document.getElementById("work-res").value, 10);
+
+  activeBackground = config.background;
 
   refPlayer.stop();
   outPlayer.stop();

@@ -103,6 +103,17 @@
       <details class="settings">
         <summary>Settings</summary>
         <div class="settings-grid">
+          <label title="Color the canvas is filled with before drawing polygons. Polygons evolve to paint on top of this color, so picking one close to the image background lets polygons focus on detail instead of repainting the background.">
+            Background Color
+            <input type="color" id="bg-color" value="#000000">
+          </label>
+          <label title="Automatically pick the background color from the reference image's edges when an image loads.">
+            Auto-detect background
+            <select id="bg-auto">
+              <option value="1" selected>On</option>
+              <option value="0">Off</option>
+            </select>
+          </label>
           <label>
             Population Size
             <input type="number" id="pop-size" value="50" min="10" max="500">
