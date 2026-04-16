@@ -13,6 +13,72 @@ function gaussianRandom() {
   return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
 }
 
+// Shape strategies — CommonJS duplicate of src/ga/shapes.js.
+const polygonShape = {
+  createGeometry(params) {
+    const nv = params.numVertices;
+    const cx = Math.random();
+    const cy = Math.random();
+    const radius = Math.random() * 0.15 + 0.02;
+    const start = Math.random() * Math.PI * 2;
+    const points = [];
+    for (let i = 0; i < nv; i++) {
+      const a = start + (i / nv) * Math.PI * 2;
+      const r = radius * (0.5 + Math.random() * 0.5);
+      points.push({
+        x: clamp(cx + Math.cos(a) * r, 0, 1),
+        y: clamp(cy + Math.sin(a) * r, 0, 1),
+      });
+    }
+    return { points };
+  },
+  cloneGeometry(s) {
+    return { points: s.points.map((pt) => ({ x: pt.x, y: pt.y })) };
+  },
+  mutateGeometry(s, mr) {
+    for (const pt of s.points) {
+      if (Math.random() < mr) {
+        pt.x = clamp(pt.x + gaussianRandom() * 0.05, 0, 1);
+        pt.y = clamp(pt.y + gaussianRandom() * 0.05, 0, 1);
+      }
+    }
+  },
+  drawPath(ctx, s, w, h) {
+    ctx.moveTo(s.points[0].x * w, s.points[0].y * h);
+    for (let i = 1; i < s.points.length; i++) {
+      ctx.lineTo(s.points[i].x * w, s.points[i].y * h);
+    }
+    ctx.closePath();
+  },
+};
+
+const circleShape = {
+  createGeometry() {
+    return {
+      x: Math.random(),
+      y: Math.random(),
+      radius: Math.random() * 0.12 + 0.01,
+    };
+  },
+  cloneGeometry(s) {
+    return { x: s.x, y: s.y, radius: s.radius };
+  },
+  mutateGeometry(s, mr) {
+    if (Math.random() < mr) s.x = clamp(s.x + gaussianRandom() * 0.05, 0, 1);
+    if (Math.random() < mr) s.y = clamp(s.y + gaussianRandom() * 0.05, 0, 1);
+    if (Math.random() < mr)
+      s.radius = clamp(s.radius + gaussianRandom() * 0.02, 0.002, 0.5);
+  },
+  drawPath(ctx, s, w, h) {
+    const r = s.radius * Math.min(w, h);
+    ctx.arc(s.x * w, s.y * h, r, 0, Math.PI * 2);
+  },
+};
+
+function getShape(name) {
+  return name === "circle" ? circleShape : polygonShape;
+}
+
 class GA {
   constructor(refData, w, h, cfg, createCanvas, wasmInstance) {
     this.refData = refData;
@@ -20,6 +86,8 @@ class GA {
     this.h = h;
     this.cfg = cfg;
     this.wasm = wasmInstance;
+    this.strategy = getShape(cfg.shape);
+    this.shapeParams = { numVertices: cfg.numVertices };
 
     // Full-res canvas
     this.canvas = createCanvas(w, h);
@@ -69,23 +137,9 @@ class GA {
     return p;
   }
 
-  _randomPolygon() {
-    const nv = this.cfg.numVertices;
-    const cx = Math.random();
-    const cy = Math.random();
-    const radius = Math.random() * 0.15 + 0.02;
-    const start = Math.random() * Math.PI * 2;
-    const points = [];
-    for (let i = 0; i < nv; i++) {
-      const a = start + (i / nv) * Math.PI * 2;
-      const r = radius * (0.5 + Math.random() * 0.5);
-      points.push({
-        x: clamp(cx + Math.cos(a) * r, 0, 1),
-        y: clamp(cy + Math.sin(a) * r, 0, 1),
-      });
-    }
+  _randomShape() {
     return GA._polyFill({
-      points,
+      ...this.strategy.createGeometry(this.shapeParams),
       r: Math.floor(Math.random() * 256),
       g: Math.floor(Math.random() * 256),
       b: Math.floor(Math.random() * 256),
@@ -93,26 +147,26 @@ class GA {
     });
   }
 
-  _clonePoly(p) {
+  _cloneShape(s) {
     return {
-      points: p.points.map((pt) => ({ x: pt.x, y: pt.y })),
-      r: p.r,
-      g: p.g,
-      b: p.b,
-      a: p.a,
-      fill: p.fill,
+      ...this.strategy.cloneGeometry(s),
+      r: s.r,
+      g: s.g,
+      b: s.b,
+      a: s.a,
+      fill: s.fill,
     };
   }
 
   _cloneInd(ind) {
-    return { polygons: ind.polygons.map((p) => this._clonePoly(p)) };
+    return { polygons: ind.polygons.map((s) => this._cloneShape(s)) };
   }
 
   _createIndividual() {
-    const polys = [];
+    const shapes = [];
     for (let i = 0; i < this.cfg.numPolygons; i++)
-      polys.push(this._randomPolygon());
-    return { polygons: polys };
+      shapes.push(this._randomShape());
+    return { polygons: shapes };
   }
 
   _initPopulation() {
@@ -127,14 +181,10 @@ class GA {
   _renderTo(ind, c, w, h) {
     c.fillStyle = this.cfg.background || "#000";
     c.fillRect(0, 0, w, h);
-    for (const poly of ind.polygons) {
+    for (const s of ind.polygons) {
       c.beginPath();
-      c.moveTo(poly.points[0].x * w, poly.points[0].y * h);
-      for (let j = 1; j < poly.points.length; j++) {
-        c.lineTo(poly.points[j].x * w, poly.points[j].y * h);
-      }
-      c.closePath();
-      c.fillStyle = poly.fill;
+      this.strategy.drawPath(c, s, w, h);
+      c.fillStyle = s.fill;
       c.fill();
     }
   }
@@ -173,7 +223,7 @@ class GA {
     const child = { polygons: [] };
     for (let i = 0; i < p1.polygons.length; i++) {
       const src = Math.random() < 0.5 ? p1 : p2;
-      child.polygons.push(this._clonePoly(src.polygons[i]));
+      child.polygons.push(this._cloneShape(src.polygons[i]));
     }
     return child;
   }
@@ -182,34 +232,29 @@ class GA {
     const mr = this.cfg.mutationRate;
     for (let i = 0; i < ind.polygons.length; i++) {
       if (Math.random() < mr * 0.1) {
-        ind.polygons[i] = this._randomPolygon();
+        ind.polygons[i] = this._randomShape();
         continue;
       }
-      const poly = ind.polygons[i];
-      for (const pt of poly.points) {
-        if (Math.random() < mr) {
-          pt.x = clamp(pt.x + gaussianRandom() * 0.05, 0, 1);
-          pt.y = clamp(pt.y + gaussianRandom() * 0.05, 0, 1);
-        }
-      }
+      const s = ind.polygons[i];
+      this.strategy.mutateGeometry(s, mr, this.shapeParams);
       let cc = false;
       if (Math.random() < mr) {
-        poly.r = clamp(poly.r + Math.floor(gaussianRandom() * 20), 0, 255);
+        s.r = clamp(s.r + Math.floor(gaussianRandom() * 20), 0, 255);
         cc = true;
       }
       if (Math.random() < mr) {
-        poly.g = clamp(poly.g + Math.floor(gaussianRandom() * 20), 0, 255);
+        s.g = clamp(s.g + Math.floor(gaussianRandom() * 20), 0, 255);
         cc = true;
       }
       if (Math.random() < mr) {
-        poly.b = clamp(poly.b + Math.floor(gaussianRandom() * 20), 0, 255);
+        s.b = clamp(s.b + Math.floor(gaussianRandom() * 20), 0, 255);
         cc = true;
       }
       if (Math.random() < mr) {
-        poly.a = clamp(poly.a + gaussianRandom() * 0.05, 0.01, 1);
+        s.a = clamp(s.a + gaussianRandom() * 0.05, 0.01, 1);
         cc = true;
       }
-      if (cc) GA._polyFill(poly);
+      if (cc) GA._polyFill(s);
       if (Math.random() < mr * 0.5) {
         const j = Math.floor(Math.random() * ind.polygons.length);
         [ind.polygons[i], ind.polygons[j]] = [ind.polygons[j], ind.polygons[i]];
@@ -254,15 +299,7 @@ class GA {
       if (this.fitnesses[i] > this.fitnesses[worstIdx]) worstIdx = i;
     }
     const migrant = {
-      polygons: polygons.map((p) =>
-        GA._polyFill({
-          points: p.points.map((pt) => ({ x: pt.x, y: pt.y })),
-          r: p.r,
-          g: p.g,
-          b: p.b,
-          a: p.a,
-        }),
-      ),
+      polygons: polygons.map((s) => GA._polyFill(this._cloneShape(s))),
     };
     this.population[worstIdx] = migrant;
     this.fitnesses[worstIdx] = Infinity;

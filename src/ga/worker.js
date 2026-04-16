@@ -5,12 +5,14 @@ import { createAdaptiveMutation } from "./adaptive-mutation.js";
 import { diffToSimilarity, pixelDiffJS } from "./fitness.js";
 import {
   cloneIndividual,
+  cloneShape,
   createIndividual,
   crossover,
   mutate,
   polyFill,
   tournamentSelect,
 } from "./operators.js";
+import { getShape } from "./shapes.js";
 
 let running = false;
 let generation = 0;
@@ -22,6 +24,8 @@ let referenceData = null;
 let width = 0;
 let height = 0;
 let config = {};
+let strategy = null;
+let shapeParams = {};
 let canvas, ctx;
 
 // Wasm fitness
@@ -55,6 +59,8 @@ self.onmessage = async (e) => {
     width = data.width;
     height = data.height;
     config = data.config;
+    strategy = getShape(config.shape);
+    shapeParams = { numVertices: config.numVertices };
     _pixelLen = width * height * 4;
 
     canvas = new OffscreenCanvas(width, height);
@@ -109,15 +115,7 @@ self.onmessage = async (e) => {
         if (fitnesses[i] > fitnesses[worstIdx]) worstIdx = i;
       }
       const migrant = {
-        polygons: data.polygons.map((p) =>
-          polyFill({
-            points: p.points.map((pt) => ({ x: pt.x, y: pt.y })),
-            r: p.r,
-            g: p.g,
-            b: p.b,
-            a: p.a,
-          }),
-        ),
+        polygons: data.polygons.map((s) => polyFill(cloneShape(strategy, s))),
       };
       population[worstIdx] = migrant;
       fitnesses[worstIdx] = Infinity;
@@ -131,30 +129,24 @@ function initPopulation() {
   population = [];
   fitnesses = [];
   for (let i = 0; i < config.populationSize; i++) {
-    population.push(createIndividual(config.numPolygons, config.numVertices));
+    population.push(
+      createIndividual(strategy, config.numPolygons, shapeParams),
+    );
     fitnesses.push(Infinity);
   }
 }
 
-function warmStartPopulation(polygons) {
+function warmStartPopulation(shapes) {
   const seed = {
-    polygons: polygons.map((p) =>
-      polyFill({
-        points: p.points.map((pt) => ({ x: pt.x, y: pt.y })),
-        r: p.r,
-        g: p.g,
-        b: p.b,
-        a: p.a,
-      }),
-    ),
+    polygons: shapes.map((s) => polyFill(cloneShape(strategy, s))),
   };
   population = [];
   fitnesses = [];
-  population.push(cloneIndividual(seed));
+  population.push(cloneIndividual(strategy, seed));
   fitnesses.push(Infinity);
   for (let i = 1; i < config.populationSize; i++) {
-    const copy = cloneIndividual(seed);
-    mutate(copy, config.mutationRate, config.numVertices);
+    const copy = cloneIndividual(strategy, seed);
+    mutate(strategy, copy, config.mutationRate, shapeParams);
     population.push(copy);
     fitnesses.push(Infinity);
   }
@@ -165,14 +157,10 @@ function warmStartPopulation(polygons) {
 function renderTo(individual, c, w, h) {
   c.fillStyle = config.background || "#000";
   c.fillRect(0, 0, w, h);
-  for (const poly of individual.polygons) {
+  for (const s of individual.polygons) {
     c.beginPath();
-    c.moveTo(poly.points[0].x * w, poly.points[0].y * h);
-    for (let j = 1; j < poly.points.length; j++) {
-      c.lineTo(poly.points[j].x * w, poly.points[j].y * h);
-    }
-    c.closePath();
-    c.fillStyle = poly.fill;
+    strategy.drawPath(c, s, w, h);
+    c.fillStyle = s.fill;
     c.fill();
   }
 }
@@ -204,17 +192,17 @@ function runGeneration() {
 
   if (fitnesses[genBestIdx] < bestFitness) {
     bestFitness = fitnesses[genBestIdx];
-    bestIndividual = cloneIndividual(population[genBestIdx]);
+    bestIndividual = cloneIndividual(strategy, population[genBestIdx]);
   }
 
   const next = [];
-  next.push(cloneIndividual(population[genBestIdx]));
+  next.push(cloneIndividual(strategy, population[genBestIdx]));
 
   while (next.length < config.populationSize) {
     const p1 = tournamentSelect(population, fitnesses, config.tournamentSize);
     const p2 = tournamentSelect(population, fitnesses, config.tournamentSize);
-    const child = crossover(p1, p2);
-    mutate(child, adaptiveMutation.rate, config.numVertices);
+    const child = crossover(strategy, p1, p2);
+    mutate(strategy, child, adaptiveMutation.rate, shapeParams);
     next.push(child);
   }
 
