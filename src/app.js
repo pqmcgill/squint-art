@@ -390,7 +390,9 @@ dlCancelBtn.addEventListener("click", () => {
 dlCustomW.addEventListener("input", () => {
   const w = parseInt(dlCustomW.value, 10);
   if (w > 0) {
-    dlCustomH.value = Math.round(w * (outputCanvas.height / outputCanvas.width));
+    dlCustomH.value = Math.round(
+      w * (outputCanvas.height / outputCanvas.width),
+    );
   } else {
     dlCustomH.value = "";
   }
