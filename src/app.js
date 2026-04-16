@@ -40,6 +40,12 @@ const gifProgressPct = document.getElementById("gif-progress-pct");
 const gifProgressFill = document.getElementById("gif-progress-fill");
 const gifCancelRunBtn = document.getElementById("gif-cancel-btn");
 
+const dlModal = document.getElementById("download-modal");
+const dlConfirmBtn = document.getElementById("dl-confirm");
+const dlCancelBtn = document.getElementById("dl-cancel");
+const dlCustomW = document.getElementById("dl-custom-w");
+const dlCustomH = document.getElementById("dl-custom-h");
+
 // ---- Services ----
 
 const benchData = new BenchmarkData();
@@ -66,6 +72,7 @@ bgAutoSelect.addEventListener("change", () => {
 let referenceImage = null;
 let isGifMode = false;
 let startTime = 0;
+let lastPolygons = null;
 // Background captured at run start — keeps display stable if user changes the
 // picker mid-run (the new value will only apply on the next Start).
 let activeBackground = "#000000";
@@ -230,6 +237,7 @@ function setupWorkspace(img) {
 islands.onUpdate = (i, msg) => {
   migViz.updateIsland(i, msg.similarity);
   if (islands.globalBest && msg.polygons === islands.globalBest.polygons) {
+    lastPolygons = msg.polygons;
     render(msg.polygons);
   }
   updateStats();
@@ -294,6 +302,7 @@ resetBtn.addEventListener("click", () => {
   outputCanvas
     .getContext("2d")
     .clearRect(0, 0, outputCanvas.width, outputCanvas.height);
+  lastPolygons = null;
   canvasPlayBtn.classList.remove("hidden");
   showControls(startBtn, newImageBtn);
   resetStats();
@@ -306,6 +315,7 @@ newImageBtn.addEventListener("click", () => {
   outPlayer.stop();
   gifProcessor.cancel();
   isGifMode = false;
+  lastPolygons = null;
   workspace.classList.add("hidden");
   gifProgress.classList.add("hidden");
   document.getElementById("controls-buttons").classList.remove("hidden");
@@ -316,11 +326,85 @@ newImageBtn.addEventListener("click", () => {
 
 downloadBtn.addEventListener("click", () => {
   if (!isGifMode) {
-    const link = document.createElement("a");
-    link.download = "squint-art.png";
-    link.href = outputCanvas.toDataURL("image/png");
-    link.click();
+    openDownloadModal();
   }
+});
+
+// ---- Download Resolution Modal ----
+
+const DL_PRESETS = {
+  "1080p": [1920, 1080],
+  "1440p": [2560, 1440],
+  "4k": [3840, 2160],
+};
+
+function computeExportSize(preset) {
+  const artW = outputCanvas.width;
+  const artH = outputCanvas.height;
+  if (preset === "original") return [artW, artH];
+  if (preset === "custom") {
+    const w = parseInt(dlCustomW.value, 10);
+    if (!w || w < 1) return [artW, artH];
+    return [w, Math.round(w * (artH / artW))];
+  }
+  const [boxW, boxH] = DL_PRESETS[preset];
+  const scale = Math.min(boxW / artW, boxH / artH);
+  return [Math.round(artW * scale), Math.round(artH * scale)];
+}
+
+function openDownloadModal() {
+  // Populate computed dimensions for each preset
+  for (const el of dlModal.querySelectorAll(".dl-dims")) {
+    const [w, h] = computeExportSize(el.dataset.preset);
+    el.textContent = `${w} \u00d7 ${h}`;
+  }
+  dlModal.classList.remove("hidden");
+}
+
+dlConfirmBtn.addEventListener("click", () => {
+  const selected = dlModal.querySelector('input[name="dl-res"]:checked').value;
+  const [w, h] = computeExportSize(selected);
+
+  const tmp = document.createElement("canvas");
+  tmp.width = w;
+  tmp.height = h;
+  renderPolygons(tmp.getContext("2d"), w, h, lastPolygons, activeBackground);
+
+  tmp.toBlob((blob) => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `squint-art-${w}x${h}.png`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, "image/png");
+
+  dlModal.classList.add("hidden");
+});
+
+dlCancelBtn.addEventListener("click", () => {
+  dlModal.classList.add("hidden");
+});
+
+// Custom width auto-computes height from aspect ratio
+dlCustomW.addEventListener("input", () => {
+  const w = parseInt(dlCustomW.value, 10);
+  if (w > 0) {
+    dlCustomH.value = Math.round(
+      w * (outputCanvas.height / outputCanvas.width),
+    );
+  } else {
+    dlCustomH.value = "";
+  }
+});
+
+// Enable custom inputs only when Custom is selected
+dlModal.querySelectorAll('input[name="dl-res"]').forEach((radio) => {
+  radio.addEventListener("change", () => {
+    const isCustom = radio.value === "custom" && radio.checked;
+    dlCustomW.disabled = !isCustom;
+    if (isCustom) dlCustomW.focus();
+  });
 });
 
 // ---- GIF Mode ----
