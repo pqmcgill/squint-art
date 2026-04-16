@@ -169,6 +169,49 @@
         </div>
       </div>
 
+      <!-- Download resolution modal -->
+      <div id="download-modal" class="modal hidden">
+        <div class="modal-content">
+          <h3>Download</h3>
+          <p>Re-renders the art at the selected resolution.</p>
+          <div class="download-resolutions">
+            <label class="dl-option">
+              <input type="radio" name="dl-res" value="original" checked>
+              <span>Original</span>
+              <span class="dl-dims" data-preset="original"></span>
+            </label>
+            <label class="dl-option">
+              <input type="radio" name="dl-res" value="1080p">
+              <span>HD 1080p</span>
+              <span class="dl-dims" data-preset="1080p"></span>
+            </label>
+            <label class="dl-option">
+              <input type="radio" name="dl-res" value="1440p">
+              <span>QHD 1440p</span>
+              <span class="dl-dims" data-preset="1440p"></span>
+            </label>
+            <label class="dl-option">
+              <input type="radio" name="dl-res" value="4k">
+              <span>4K UHD</span>
+              <span class="dl-dims" data-preset="4k"></span>
+            </label>
+            <label class="dl-option">
+              <input type="radio" name="dl-res" value="custom">
+              <span>Custom</span>
+              <span class="dl-custom-inputs">
+                <input type="number" id="dl-custom-w" min="1" max="7680" placeholder="Width" disabled>
+                <span>&times;</span>
+                <input type="number" id="dl-custom-h" disabled placeholder="Height">
+              </span>
+            </label>
+          </div>
+          <div class="modal-actions">
+            <button id="dl-confirm" class="btn btn-primary">Download</button>
+            <button id="dl-cancel" class="btn">Cancel</button>
+          </div>
+        </div>
+      </div>
+
 
       <!-- Performance charts: collapsed by default, skip rendering when closed -->
       <details class="monitor-panel" id="monitor-panel" title="Similarity over time and island migration visualization. Collapsed to save CPU cycles.">

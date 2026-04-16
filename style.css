@@ -516,6 +516,77 @@ canvas {
   justify-content: flex-end;
 }
 
+/* ---- Download Resolution Modal ---- */
+.download-resolutions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.dl-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #333;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: #ccc;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.dl-option:hover {
+  border-color: #555;
+  background: #252528;
+}
+
+.dl-option:has(input:checked) {
+  border-color: #7c6aef;
+  background: rgba(124, 106, 239, 0.1);
+}
+
+.dl-option input[type="radio"] {
+  accent-color: #7c6aef;
+}
+
+.dl-dims {
+  margin-left: auto;
+  font-size: 0.75rem;
+  color: #666;
+  font-variant-numeric: tabular-nums;
+}
+
+.dl-custom-inputs {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  color: #666;
+}
+
+.dl-custom-inputs input {
+  width: 65px;
+  padding: 0.2rem 0.4rem;
+  border: 1px solid #333;
+  border-radius: 4px;
+  background: #141416;
+  color: #e0e0e0;
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.dl-custom-inputs input:disabled {
+  opacity: 0.4;
+}
+
+.dl-custom-inputs input:focus {
+  outline: none;
+  border-color: #7c6aef;
+}
+
 /* ---- GIF Progress ---- */
 .gif-progress {
   display: flex;
