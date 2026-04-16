@@ -163,7 +163,7 @@ function warmStartPopulation(polygons) {
 // --- Rendering & Fitness ---
 
 function renderTo(individual, c, w, h) {
-  c.fillStyle = "#000";
+  c.fillStyle = config.background || "#000";
   c.fillRect(0, 0, w, h);
   for (const poly of individual.polygons) {
     c.beginPath();
