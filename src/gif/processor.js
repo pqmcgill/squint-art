@@ -1,6 +1,8 @@
 // GIF processor — orchestrates decode → per-frame GA → encode.
 
 import { detectBackgroundColor } from "../background.js";
+import { getShape } from "../ga/shapes.js";
+import { renderPolygons } from "../render.js";
 import { decodeGif } from "./decoder.js";
 import { encodeGif } from "./encoder.js";
 
@@ -107,25 +109,14 @@ export class GifProcessor {
       const outCanvas = document.createElement("canvas");
       outCanvas.width = this.width;
       outCanvas.height = this.height;
-      const outCtx = outCanvas.getContext("2d");
-      outCtx.fillStyle = frameBg;
-      outCtx.fillRect(0, 0, this.width, this.height);
-      for (const poly of result.polygons) {
-        outCtx.beginPath();
-        outCtx.moveTo(
-          poly.points[0].x * this.width,
-          poly.points[0].y * this.height,
-        );
-        for (let j = 1; j < poly.points.length; j++) {
-          outCtx.lineTo(
-            poly.points[j].x * this.width,
-            poly.points[j].y * this.height,
-          );
-        }
-        outCtx.closePath();
-        outCtx.fillStyle = `rgba(${poly.r},${poly.g},${poly.b},${poly.a})`;
-        outCtx.fill();
-      }
+      renderPolygons(
+        outCanvas.getContext("2d"),
+        this.width,
+        this.height,
+        result.polygons,
+        frameBg,
+        getShape(config.shape),
+      );
       this.outputFrames.push({ canvas: outCanvas, delay: frame.delay });
 
       if (this.onProgress)

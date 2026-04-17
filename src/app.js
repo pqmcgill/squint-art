@@ -5,6 +5,7 @@ import { BenchmarkData } from "./chart/data.js";
 import { MigrationViz } from "./chart/migration-viz.js";
 import { ChartRenderer } from "./chart/renderer.js";
 import { getDefaultIslandCount, IslandManager } from "./ga/island-manager.js";
+import { getShape } from "./ga/shapes.js";
 import { GifPlayer } from "./gif/player.js";
 import { GifProcessor } from "./gif/processor.js";
 import { renderPolygons } from "./render.js";
@@ -69,6 +70,15 @@ bgAutoSelect.addEventListener("change", () => {
   localStorage.setItem(BG_AUTO_KEY, bgAutoSelect.value);
 });
 
+const shapeSelect = document.getElementById("shape");
+const numVerticesLabel = document.getElementById("num-vertices-label");
+function updateVerticesVisibility() {
+  numVerticesLabel.style.display =
+    shapeSelect.value === "polygon" ? "" : "none";
+}
+shapeSelect.addEventListener("change", updateVerticesVisibility);
+updateVerticesVisibility();
+
 let referenceImage = null;
 let isGifMode = false;
 let startTime = 0;
@@ -76,6 +86,7 @@ let lastPolygons = null;
 // Background captured at run start — keeps display stable if user changes the
 // picker mid-run (the new value will only apply on the next Start).
 let activeBackground = "#000000";
+let activeShape = getShape("polygon");
 
 // Short-circuit: skip chart/viz work when panel is collapsed
 function isMonitorOpen() {
@@ -97,6 +108,7 @@ function getConfig() {
     fitDiv: parseInt(document.getElementById("fit-div").value, 10),
     subSample: parseInt(document.getElementById("sub-sample").value, 10),
     background: bgColorInput.value,
+    shape: document.getElementById("shape").value,
   };
 }
 
@@ -129,6 +141,7 @@ function render(polygons, bg = activeBackground) {
     outputCanvas.height,
     polygons,
     bg,
+    activeShape,
   );
 }
 
@@ -252,6 +265,7 @@ function startIslands() {
   const topology = getTopology();
 
   activeBackground = config.background;
+  activeShape = getShape(config.shape);
 
   benchData.startRun({ ...config, islands: numIslands, topology });
   migViz.reset(topology, numIslands);
@@ -368,7 +382,14 @@ dlConfirmBtn.addEventListener("click", () => {
   const tmp = document.createElement("canvas");
   tmp.width = w;
   tmp.height = h;
-  renderPolygons(tmp.getContext("2d"), w, h, lastPolygons, activeBackground);
+  renderPolygons(
+    tmp.getContext("2d"),
+    w,
+    h,
+    lastPolygons,
+    activeBackground,
+    activeShape,
+  );
 
   tmp.toBlob((blob) => {
     const url = URL.createObjectURL(blob);
@@ -480,6 +501,7 @@ async function startGifProcessing() {
   config.autoBackground = bgAutoSelect.value === "1";
 
   activeBackground = config.background;
+  activeShape = getShape(config.shape);
 
   refPlayer.stop();
   outPlayer.stop();

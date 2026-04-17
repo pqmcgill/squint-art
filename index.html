@@ -118,11 +118,21 @@
             Population Size
             <input type="number" id="pop-size" value="50" min="10" max="500">
           </label>
-          <label>
-            Polygons per Individual
-            <input type="number" id="num-polygons" value="50" min="5" max="300">
+          <label title="Shape primitive used to approximate the image.">
+            Shape
+            <select id="shape">
+              <option value="polygon">Polygon</option>
+              <option value="circle">Circle</option>
+              <option value="ellipse">Ellipse</option>
+              <option value="rectangle">Rectangle</option>
+              <option value="line">Line</option>
+            </select>
           </label>
           <label>
+            Shapes per Individual
+            <input type="number" id="num-polygons" value="50" min="5" max="300">
+          </label>
+          <label id="num-vertices-label">
             Vertices per Polygon
             <input type="number" id="num-vertices" value="6" min="3" max="10">
           </label>
