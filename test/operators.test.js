@@ -12,7 +12,7 @@ import {
   polyFill,
   tournamentSelect,
 } from "../src/ga/operators.js";
-import { circleShape, polygonShape } from "../src/ga/shapes.js";
+import { circleShape, ellipseShape, polygonShape } from "../src/ga/shapes.js";
 
 describe("clamp", () => {
   test("returns value when within bounds", () => {
@@ -272,6 +272,27 @@ describe("mutate", () => {
       expect(s.radius).toBeLessThanOrEqual(0.5);
       expect(s.r).toBeGreaterThanOrEqual(0);
       expect(s.r).toBeLessThanOrEqual(255);
+      expect(s.fill).toMatch(/^rgba\(/);
+    }
+  });
+
+  test("does not corrupt ellipse structure after many mutations", () => {
+    const ind = createIndividual(ellipseShape, 12, {});
+
+    for (let i = 0; i < 100; i++) {
+      mutate(ellipseShape, ind, 0.5, {});
+    }
+
+    expect(ind.polygons).toHaveLength(12);
+    for (const s of ind.polygons) {
+      expect(s.x).toBeGreaterThanOrEqual(0);
+      expect(s.x).toBeLessThanOrEqual(1);
+      expect(s.rx).toBeGreaterThan(0);
+      expect(s.rx).toBeLessThanOrEqual(0.5);
+      expect(s.ry).toBeGreaterThan(0);
+      expect(s.ry).toBeLessThanOrEqual(0.5);
+      expect(s.rotation).toBeGreaterThanOrEqual(0);
+      expect(s.rotation).toBeLessThan(Math.PI * 2);
       expect(s.fill).toMatch(/^rgba\(/);
     }
   });

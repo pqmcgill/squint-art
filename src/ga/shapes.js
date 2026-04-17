@@ -79,9 +79,63 @@ export const circleShape = {
   },
 };
 
+export const ellipseShape = {
+  name: "ellipse",
+
+  createGeometry(_params) {
+    return {
+      x: Math.random(),
+      y: Math.random(),
+      rx: Math.random() * 0.12 + 0.01,
+      ry: Math.random() * 0.12 + 0.01,
+      rotation: Math.random() * Math.PI * 2,
+    };
+  },
+
+  cloneGeometry(s) {
+    return { x: s.x, y: s.y, rx: s.rx, ry: s.ry, rotation: s.rotation };
+  },
+
+  mutateGeometry(s, mr, _params) {
+    if (Math.random() < mr) {
+      s.x = clamp(s.x + gaussianRandom() * 0.05, 0, 1);
+    }
+    if (Math.random() < mr) {
+      s.y = clamp(s.y + gaussianRandom() * 0.05, 0, 1);
+    }
+    if (Math.random() < mr) {
+      s.rx = clamp(s.rx + gaussianRandom() * 0.02, 0.002, 0.5);
+    }
+    if (Math.random() < mr) {
+      s.ry = clamp(s.ry + gaussianRandom() * 0.02, 0.002, 0.5);
+    }
+    if (Math.random() < mr) {
+      // Rotation wraps — no clamp. Normalize into [0, 2π) to keep numbers tidy.
+      s.rotation =
+        (((s.rotation + gaussianRandom() * 0.2) % (Math.PI * 2)) +
+          Math.PI * 2) %
+        (Math.PI * 2);
+    }
+  },
+
+  drawPath(ctx, s, w, h) {
+    const scale = Math.min(w, h);
+    ctx.ellipse(
+      s.x * w,
+      s.y * h,
+      s.rx * scale,
+      s.ry * scale,
+      s.rotation,
+      0,
+      Math.PI * 2,
+    );
+  },
+};
+
 const STRATEGIES = {
   polygon: polygonShape,
   circle: circleShape,
+  ellipse: ellipseShape,
 };
 
 export function getShape(name) {

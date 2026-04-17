@@ -1,5 +1,10 @@
 import { describe, expect, test } from "bun:test";
-import { circleShape, getShape, polygonShape } from "../src/ga/shapes.js";
+import {
+  circleShape,
+  ellipseShape,
+  getShape,
+  polygonShape,
+} from "../src/ga/shapes.js";
 
 // Fake canvas ctx that records path calls — lets us verify drawPath
 // without pulling in a real canvas implementation.
@@ -11,6 +16,8 @@ function fakeCtx() {
     lineTo: (x, y) => calls.push(["lineTo", x, y]),
     closePath: () => calls.push(["closePath"]),
     arc: (x, y, r, a0, a1) => calls.push(["arc", x, y, r, a0, a1]),
+    ellipse: (x, y, rx, ry, rot, a0, a1) =>
+      calls.push(["ellipse", x, y, rx, ry, rot, a0, a1]),
   };
 }
 
@@ -18,6 +25,7 @@ describe("getShape", () => {
   test("resolves known names", () => {
     expect(getShape("polygon")).toBe(polygonShape);
     expect(getShape("circle")).toBe(circleShape);
+    expect(getShape("ellipse")).toBe(ellipseShape);
   });
 
   test("falls back to polygon for unknown/missing names", () => {
@@ -121,6 +129,66 @@ describe("circleShape", () => {
     expect(cy).toBe(50);
     // radius scales to min(w,h) = 200, so 0.1 * 200 = 20
     expect(r).toBe(20);
+    expect(a0).toBe(0);
+    expect(a1).toBeCloseTo(Math.PI * 2);
+  });
+});
+
+describe("ellipseShape", () => {
+  test("createGeometry returns all five params in valid ranges", () => {
+    const g = ellipseShape.createGeometry({});
+    expect(g.x).toBeGreaterThanOrEqual(0);
+    expect(g.x).toBeLessThanOrEqual(1);
+    expect(g.y).toBeGreaterThanOrEqual(0);
+    expect(g.y).toBeLessThanOrEqual(1);
+    expect(g.rx).toBeGreaterThan(0);
+    expect(g.ry).toBeGreaterThan(0);
+    expect(g.rotation).toBeGreaterThanOrEqual(0);
+    expect(g.rotation).toBeLessThan(Math.PI * 2);
+  });
+
+  test("cloneGeometry returns an independent copy of all fields", () => {
+    const g = ellipseShape.createGeometry({});
+    const c = ellipseShape.cloneGeometry(g);
+    c.x = 999;
+    c.rx = 999;
+    c.rotation = 999;
+    expect(g.x).not.toBe(999);
+    expect(g.rx).not.toBe(999);
+    expect(g.rotation).not.toBe(999);
+  });
+
+  test("mutateGeometry keeps coords + radii bounded and rotation in [0, 2π)", () => {
+    const g = ellipseShape.createGeometry({});
+    for (let i = 0; i < 500; i++) {
+      ellipseShape.mutateGeometry(g, 1.0, {});
+    }
+    expect(g.x).toBeGreaterThanOrEqual(0);
+    expect(g.x).toBeLessThanOrEqual(1);
+    expect(g.y).toBeGreaterThanOrEqual(0);
+    expect(g.y).toBeLessThanOrEqual(1);
+    expect(g.rx).toBeGreaterThanOrEqual(0.002);
+    expect(g.rx).toBeLessThanOrEqual(0.5);
+    expect(g.ry).toBeGreaterThanOrEqual(0.002);
+    expect(g.ry).toBeLessThanOrEqual(0.5);
+    expect(g.rotation).toBeGreaterThanOrEqual(0);
+    expect(g.rotation).toBeLessThan(Math.PI * 2);
+  });
+
+  test("drawPath issues a single ellipse with scaled axes", () => {
+    const ctx = fakeCtx();
+    const g = { x: 0.5, y: 0.25, rx: 0.1, ry: 0.2, rotation: 1.23 };
+    ellipseShape.drawPath(ctx, g, 400, 200);
+
+    expect(ctx.calls).toHaveLength(1);
+    const [name, cx, cy, rx, ry, rot, a0, a1] = ctx.calls[0];
+    expect(name).toBe("ellipse");
+    expect(cx).toBe(200);
+    expect(cy).toBe(50);
+    // Radii scale to min(w,h) = 200
+    expect(rx).toBe(20);
+    expect(ry).toBe(40);
+    expect(rot).toBe(1.23);
     expect(a0).toBe(0);
     expect(a1).toBeCloseTo(Math.PI * 2);
   });
