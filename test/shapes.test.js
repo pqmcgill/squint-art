@@ -3,7 +3,9 @@ import {
   circleShape,
   ellipseShape,
   getShape,
+  lineShape,
   polygonShape,
+  rectangleShape,
 } from "../src/ga/shapes.js";
 
 // Fake canvas ctx that records path calls — lets us verify drawPath
@@ -18,6 +20,11 @@ function fakeCtx() {
     arc: (x, y, r, a0, a1) => calls.push(["arc", x, y, r, a0, a1]),
     ellipse: (x, y, rx, ry, rot, a0, a1) =>
       calls.push(["ellipse", x, y, rx, ry, rot, a0, a1]),
+    rect: (x, y, w, h) => calls.push(["rect", x, y, w, h]),
+    save: () => calls.push(["save"]),
+    restore: () => calls.push(["restore"]),
+    translate: (x, y) => calls.push(["translate", x, y]),
+    rotate: (a) => calls.push(["rotate", a]),
   };
 }
 
@@ -26,6 +33,8 @@ describe("getShape", () => {
     expect(getShape("polygon")).toBe(polygonShape);
     expect(getShape("circle")).toBe(circleShape);
     expect(getShape("ellipse")).toBe(ellipseShape);
+    expect(getShape("rectangle")).toBe(rectangleShape);
+    expect(getShape("line")).toBe(lineShape);
   });
 
   test("falls back to polygon for unknown/missing names", () => {
@@ -191,5 +200,120 @@ describe("ellipseShape", () => {
     expect(rot).toBe(1.23);
     expect(a0).toBe(0);
     expect(a1).toBeCloseTo(Math.PI * 2);
+  });
+});
+
+describe("rectangleShape", () => {
+  test("createGeometry returns all five params in valid ranges", () => {
+    const g = rectangleShape.createGeometry({});
+    expect(g.x).toBeGreaterThanOrEqual(0);
+    expect(g.x).toBeLessThanOrEqual(1);
+    expect(g.y).toBeGreaterThanOrEqual(0);
+    expect(g.y).toBeLessThanOrEqual(1);
+    expect(g.w).toBeGreaterThan(0);
+    expect(g.h).toBeGreaterThan(0);
+    expect(g.rotation).toBeGreaterThanOrEqual(0);
+    expect(g.rotation).toBeLessThan(Math.PI * 2);
+  });
+
+  test("cloneGeometry returns an independent copy of all fields", () => {
+    const g = rectangleShape.createGeometry({});
+    const c = rectangleShape.cloneGeometry(g);
+    c.x = 999;
+    c.w = 999;
+    c.rotation = 999;
+    expect(g.x).not.toBe(999);
+    expect(g.w).not.toBe(999);
+    expect(g.rotation).not.toBe(999);
+  });
+
+  test("mutateGeometry keeps coords bounded and rotation in [0, 2π)", () => {
+    const g = rectangleShape.createGeometry({});
+    for (let i = 0; i < 500; i++) {
+      rectangleShape.mutateGeometry(g, 1.0, {});
+    }
+    expect(g.x).toBeGreaterThanOrEqual(0);
+    expect(g.x).toBeLessThanOrEqual(1);
+    expect(g.y).toBeGreaterThanOrEqual(0);
+    expect(g.y).toBeLessThanOrEqual(1);
+    expect(g.w).toBeGreaterThanOrEqual(0.004);
+    expect(g.w).toBeLessThanOrEqual(1);
+    expect(g.h).toBeGreaterThanOrEqual(0.004);
+    expect(g.h).toBeLessThanOrEqual(1);
+    expect(g.rotation).toBeGreaterThanOrEqual(0);
+    expect(g.rotation).toBeLessThan(Math.PI * 2);
+  });
+
+  test("drawPath emits transform-save/translate/rotate/rect/restore", () => {
+    const ctx = fakeCtx();
+    const g = { x: 0.5, y: 0.25, w: 0.1, h: 0.2, rotation: 1.23 };
+    rectangleShape.drawPath(ctx, g, 400, 200);
+
+    // Center translate at (200, 50); scale min(w,h) = 200, so rect size is
+    // 20 × 40 drawn centered around origin.
+    expect(ctx.calls).toEqual([
+      ["save"],
+      ["translate", 200, 50],
+      ["rotate", 1.23],
+      ["rect", -10, -20, 20, 40],
+      ["restore"],
+    ]);
+  });
+});
+
+describe("lineShape", () => {
+  test("createGeometry returns two endpoints + thickness", () => {
+    const g = lineShape.createGeometry({});
+    for (const k of ["x1", "y1", "x2", "y2"]) {
+      expect(g[k]).toBeGreaterThanOrEqual(0);
+      expect(g[k]).toBeLessThanOrEqual(1);
+    }
+    expect(g.thickness).toBeGreaterThan(0);
+  });
+
+  test("cloneGeometry returns an independent copy", () => {
+    const g = lineShape.createGeometry({});
+    const c = lineShape.cloneGeometry(g);
+    c.x1 = 999;
+    c.thickness = 999;
+    expect(g.x1).not.toBe(999);
+    expect(g.thickness).not.toBe(999);
+  });
+
+  test("mutateGeometry keeps endpoints bounded and thickness in range", () => {
+    const g = lineShape.createGeometry({});
+    for (let i = 0; i < 500; i++) {
+      lineShape.mutateGeometry(g, 1.0, {});
+    }
+    for (const k of ["x1", "y1", "x2", "y2"]) {
+      expect(g[k]).toBeGreaterThanOrEqual(0);
+      expect(g[k]).toBeLessThanOrEqual(1);
+    }
+    expect(g.thickness).toBeGreaterThanOrEqual(0.001);
+    expect(g.thickness).toBeLessThanOrEqual(0.2);
+  });
+
+  test("drawPath emits a 4-corner quad perpendicular to the line", () => {
+    const ctx = fakeCtx();
+    // Horizontal line from (0, 0.5) to (1, 0.5) — quad extends vertically.
+    // Canvas 400x400, thickness 0.1 → t = 0.1 * 400 / 2 = 20px half-width.
+    // Normal is (0, 1), so +t is y=220 and -t is y=180.
+    const g = { x1: 0, y1: 0.5, x2: 1, y2: 0.5, thickness: 0.1 };
+    lineShape.drawPath(ctx, g, 400, 400);
+
+    expect(ctx.calls).toEqual([
+      ["moveTo", 0, 220],
+      ["lineTo", 400, 220],
+      ["lineTo", 400, 180],
+      ["lineTo", 0, 180],
+      ["closePath"],
+    ]);
+  });
+
+  test("drawPath is a no-op when endpoints collapse", () => {
+    const ctx = fakeCtx();
+    const g = { x1: 0.5, y1: 0.5, x2: 0.5, y2: 0.5, thickness: 0.1 };
+    lineShape.drawPath(ctx, g, 400, 400);
+    expect(ctx.calls).toHaveLength(0);
   });
 });

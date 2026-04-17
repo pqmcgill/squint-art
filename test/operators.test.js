@@ -12,7 +12,13 @@ import {
   polyFill,
   tournamentSelect,
 } from "../src/ga/operators.js";
-import { circleShape, ellipseShape, polygonShape } from "../src/ga/shapes.js";
+import {
+  circleShape,
+  ellipseShape,
+  lineShape,
+  polygonShape,
+  rectangleShape,
+} from "../src/ga/shapes.js";
 
 describe("clamp", () => {
   test("returns value when within bounds", () => {
@@ -293,6 +299,46 @@ describe("mutate", () => {
       expect(s.ry).toBeLessThanOrEqual(0.5);
       expect(s.rotation).toBeGreaterThanOrEqual(0);
       expect(s.rotation).toBeLessThan(Math.PI * 2);
+      expect(s.fill).toMatch(/^rgba\(/);
+    }
+  });
+
+  test("does not corrupt rectangle structure after many mutations", () => {
+    const ind = createIndividual(rectangleShape, 10, {});
+
+    for (let i = 0; i < 100; i++) {
+      mutate(rectangleShape, ind, 0.5, {});
+    }
+
+    expect(ind.polygons).toHaveLength(10);
+    for (const s of ind.polygons) {
+      expect(s.x).toBeGreaterThanOrEqual(0);
+      expect(s.x).toBeLessThanOrEqual(1);
+      expect(s.w).toBeGreaterThan(0);
+      expect(s.w).toBeLessThanOrEqual(1);
+      expect(s.h).toBeGreaterThan(0);
+      expect(s.h).toBeLessThanOrEqual(1);
+      expect(s.rotation).toBeGreaterThanOrEqual(0);
+      expect(s.rotation).toBeLessThan(Math.PI * 2);
+      expect(s.fill).toMatch(/^rgba\(/);
+    }
+  });
+
+  test("does not corrupt line structure after many mutations", () => {
+    const ind = createIndividual(lineShape, 10, {});
+
+    for (let i = 0; i < 100; i++) {
+      mutate(lineShape, ind, 0.5, {});
+    }
+
+    expect(ind.polygons).toHaveLength(10);
+    for (const s of ind.polygons) {
+      for (const k of ["x1", "y1", "x2", "y2"]) {
+        expect(s[k]).toBeGreaterThanOrEqual(0);
+        expect(s[k]).toBeLessThanOrEqual(1);
+      }
+      expect(s.thickness).toBeGreaterThan(0);
+      expect(s.thickness).toBeLessThanOrEqual(0.2);
       expect(s.fill).toMatch(/^rgba\(/);
     }
   });

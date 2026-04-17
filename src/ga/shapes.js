@@ -132,10 +132,127 @@ export const ellipseShape = {
   },
 };
 
+export const rectangleShape = {
+  name: "rectangle",
+
+  createGeometry(_params) {
+    return {
+      x: Math.random(),
+      y: Math.random(),
+      w: Math.random() * 0.18 + 0.02,
+      h: Math.random() * 0.18 + 0.02,
+      rotation: Math.random() * Math.PI * 2,
+    };
+  },
+
+  cloneGeometry(s) {
+    return { x: s.x, y: s.y, w: s.w, h: s.h, rotation: s.rotation };
+  },
+
+  mutateGeometry(s, mr, _params) {
+    if (Math.random() < mr) {
+      s.x = clamp(s.x + gaussianRandom() * 0.05, 0, 1);
+    }
+    if (Math.random() < mr) {
+      s.y = clamp(s.y + gaussianRandom() * 0.05, 0, 1);
+    }
+    if (Math.random() < mr) {
+      s.w = clamp(s.w + gaussianRandom() * 0.03, 0.004, 1);
+    }
+    if (Math.random() < mr) {
+      s.h = clamp(s.h + gaussianRandom() * 0.03, 0.004, 1);
+    }
+    if (Math.random() < mr) {
+      s.rotation =
+        (((s.rotation + gaussianRandom() * 0.2) % (Math.PI * 2)) +
+          Math.PI * 2) %
+        (Math.PI * 2);
+    }
+  },
+
+  drawPath(ctx, s, w, h) {
+    const scale = Math.min(w, h);
+    const rw = s.w * scale;
+    const rh = s.h * scale;
+    // rect() records path segments through the current CTM, so we transform
+    // around the rect's center then restore — the filled path stays rotated.
+    ctx.save();
+    ctx.translate(s.x * w, s.y * h);
+    ctx.rotate(s.rotation);
+    ctx.rect(-rw / 2, -rh / 2, rw, rh);
+    ctx.restore();
+  },
+};
+
+export const lineShape = {
+  name: "line",
+
+  createGeometry(_params) {
+    return {
+      x1: Math.random(),
+      y1: Math.random(),
+      x2: Math.random(),
+      y2: Math.random(),
+      thickness: Math.random() * 0.04 + 0.005,
+    };
+  },
+
+  cloneGeometry(s) {
+    return {
+      x1: s.x1,
+      y1: s.y1,
+      x2: s.x2,
+      y2: s.y2,
+      thickness: s.thickness,
+    };
+  },
+
+  mutateGeometry(s, mr, _params) {
+    if (Math.random() < mr) {
+      s.x1 = clamp(s.x1 + gaussianRandom() * 0.05, 0, 1);
+    }
+    if (Math.random() < mr) {
+      s.y1 = clamp(s.y1 + gaussianRandom() * 0.05, 0, 1);
+    }
+    if (Math.random() < mr) {
+      s.x2 = clamp(s.x2 + gaussianRandom() * 0.05, 0, 1);
+    }
+    if (Math.random() < mr) {
+      s.y2 = clamp(s.y2 + gaussianRandom() * 0.05, 0, 1);
+    }
+    if (Math.random() < mr) {
+      s.thickness = clamp(s.thickness + gaussianRandom() * 0.01, 0.001, 0.2);
+    }
+  },
+
+  drawPath(ctx, s, w, h) {
+    // Thick line as a filled quadrilateral — computed in pixel space so the
+    // line stays perpendicular to itself regardless of canvas aspect ratio.
+    const px1 = s.x1 * w;
+    const py1 = s.y1 * h;
+    const px2 = s.x2 * w;
+    const py2 = s.y2 * h;
+    const dx = px2 - px1;
+    const dy = py2 - py1;
+    const len = Math.sqrt(dx * dx + dy * dy);
+    if (len < 0.5) return;
+    const nx = -dy / len;
+    const ny = dx / len;
+    const t = (s.thickness * Math.min(w, h)) / 2;
+    ctx.moveTo(px1 + nx * t, py1 + ny * t);
+    ctx.lineTo(px2 + nx * t, py2 + ny * t);
+    ctx.lineTo(px2 - nx * t, py2 - ny * t);
+    ctx.lineTo(px1 - nx * t, py1 - ny * t);
+    ctx.closePath();
+  },
+};
+
 const STRATEGIES = {
   polygon: polygonShape,
   circle: circleShape,
   ellipse: ellipseShape,
+  rectangle: rectangleShape,
+  line: lineShape,
 };
 
 export function getShape(name) {
