@@ -1,7 +1,17 @@
 // GIF processor — orchestrates decode → per-frame GA → encode.
 
+import { detectBackgroundColor } from "../background.js";
 import { decodeGif } from "./decoder.js";
 import { encodeGif } from "./encoder.js";
+
+// Resolve the background for a single GIF frame: auto-detect when enabled,
+// otherwise fall back to the user-picked color (or black).
+export function resolveFrameBackground(workData, w, h, config) {
+  if (config.autoBackground) {
+    return detectBackgroundColor(workData, w, h);
+  }
+  return config.background || "#000";
+}
 
 export class GifProcessor {
   constructor() {
@@ -37,6 +47,7 @@ export class GifProcessor {
       subSample,
       generationsPerFrame,
       warmStart,
+      autoBackground,
     } = config;
 
     const workRes = config.workRes || 128;
@@ -63,6 +74,13 @@ export class GifProcessor {
       tmpCtx.drawImage(srcCanvas, 0, 0, workW, workH);
       const workData = tmpCtx.getImageData(0, 0, workW, workH).data;
 
+      // Auto-detect background per frame so GIFs with changing scenes (fades,
+      // scene cuts, moving cameras) keep their polygon budget on detail.
+      const frameBg = resolveFrameBackground(workData, workW, workH, {
+        autoBackground,
+        background: config.background,
+      });
+
       const result = await this._runWorkerOnFrame(
         workData,
         workW,
@@ -76,6 +94,7 @@ export class GifProcessor {
           fitDiv,
           subSample,
           maxGenerations: generationsPerFrame,
+          background: frameBg,
         },
         warmStart && prevPolygons ? prevPolygons : null,
       );
@@ -89,7 +108,7 @@ export class GifProcessor {
       outCanvas.width = this.width;
       outCanvas.height = this.height;
       const outCtx = outCanvas.getContext("2d");
-      outCtx.fillStyle = config.background || "#000";
+      outCtx.fillStyle = frameBg;
       outCtx.fillRect(0, 0, this.width, this.height);
       for (const poly of result.polygons) {
         outCtx.beginPath();
@@ -110,7 +129,7 @@ export class GifProcessor {
       this.outputFrames.push({ canvas: outCanvas, delay: frame.delay });
 
       if (this.onProgress)
-        this.onProgress(i + 1, this.frames.length, result.polygons);
+        this.onProgress(i + 1, this.frames.length, result.polygons, frameBg);
     }
 
     if (!this.running) return null;
