@@ -134,13 +134,13 @@ function getWorkImageData() {
   };
 }
 
-function render(polygons) {
+function render(polygons, bg = activeBackground) {
   renderPolygons(
     outputCanvas.getContext("2d"),
     outputCanvas.width,
     outputCanvas.height,
     polygons,
-    activeBackground,
+    bg,
     activeShape,
   );
 }
@@ -498,6 +498,7 @@ async function startGifProcessing() {
   );
   config.warmStart = document.getElementById("gif-warm").value === "1";
   config.workRes = parseInt(document.getElementById("work-res").value, 10);
+  config.autoBackground = bgAutoSelect.value === "1";
 
   activeBackground = config.background;
   activeShape = getShape(config.shape);
@@ -514,7 +515,7 @@ async function startGifProcessing() {
 
   const gifStartTime = Date.now();
 
-  gifProcessor.onProgress = (frameIdx, total, polygons) => {
+  gifProcessor.onProgress = (frameIdx, total, polygons, frameBg) => {
     const pct = Math.round((frameIdx / total) * 100);
     gifProgressFrame.textContent = `Generating frame ${frameIdx} / ${total}`;
     gifProgressFill.style.width = `${pct}%`;
@@ -530,7 +531,7 @@ async function startGifProcessing() {
       gifProgressEta.textContent = `~${remaining}s left`;
     }
 
-    render(polygons);
+    render(polygons, frameBg);
 
     const frame = gifProcessor.frames[frameIdx - 1];
     const tmpCanvas = document.createElement("canvas");
