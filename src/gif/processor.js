@@ -97,6 +97,7 @@ export class GifProcessor {
           subSample,
           maxGenerations: generationsPerFrame,
           background: frameBg,
+          shape: config.shape,
         },
         warmStart && prevPolygons ? prevPolygons : null,
       );
